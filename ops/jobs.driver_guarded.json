@@ -1,0 +1,35 @@
+{
+  "_comment": "Driver-enabled models that require bounded recent-history windows to avoid >100 GiB host allocations.",
+  "jobs": [
+    {
+      "label": "nhits+drv",
+      "model": "nhits",
+      "outdir": "nhits_drv",
+      "extra_args": [
+        "--drivers-parquet", "nn_cache/drivers_hourly.parquet",
+        "--drivers-manifest", "nn_cache/drivers_manifest.json"
+      ],
+      "profile": "safe"
+    },
+    {
+      "label": "tft+drv",
+      "model": "tft",
+      "outdir": "tft_drv",
+      "extra_args": [
+        "--drivers-parquet", "nn_cache/drivers_hourly.parquet",
+        "--drivers-manifest", "nn_cache/drivers_manifest.json"
+      ],
+      "profile": "safe"
+    },
+    {
+      "label": "nbeatsx+drv",
+      "model": "nbeatsx",
+      "outdir": "nbeatsx_drv",
+      "extra_args": [
+        "--drivers-parquet", "nn_cache/drivers_hourly.parquet",
+        "--drivers-manifest", "nn_cache/drivers_manifest.json"
+      ],
+      "profile": "safe"
+    }
+  ]
+}

@@ -1,0 +1,134 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mbari-ai-forecasting"
+version = "0.1.0"
+description = "Local MBARI ocean forecasting, model validation, and release-gate tooling."
+requires-python = ">=3.12"
+readme = "README.md"
+license = { text = "Proprietary" }
+authors = [{ name = "Local MBARI AI project" }]
+dependencies = [
+  "duckdb",
+  "numpy",
+  "pandas",
+  "pyarrow",
+  "scikit-learn",
+  "torch",
+  "xgboost",
+]
+
+[project.optional-dependencies]
+test = [
+  "pytest",
+]
+analysis = [
+  "scipy",
+  "pandas-gbq",
+  "statsmodels",
+]
+foundation = [
+  "chronos-forecasting",
+]
+geo = [
+  "aiohttp",
+  "beautifulsoup4",
+  "dask[complete]",
+  "db-dtypes",
+  "fsspec",
+  "google-cloud-bigquery",
+  "google-cloud-bigquery-storage",
+  "h5netcdf",
+  "netCDF4",
+  "pandera",
+  "requests",
+  "xarray",
+  "zarr",
+]
+neural = [
+  "neuralforecast",
+  "pytorch-lightning",
+  "tensorboard",
+  "tensorboardX",
+]
+all = [
+  "aiohttp",
+  "beautifulsoup4",
+  "chronos-forecasting",
+  "dask[complete]",
+  "db-dtypes",
+  "fsspec",
+  "google-cloud-bigquery",
+  "google-cloud-bigquery-storage",
+  "h5netcdf",
+  "netCDF4",
+  "neuralforecast",
+  "pandas-gbq",
+  "pandera",
+  "pytorch-lightning",
+  "requests",
+  "scipy",
+  "statsmodels",
+  "tensorboard",
+  "tensorboardX",
+  "xarray",
+  "zarr",
+]
+dev = [
+  "pytest",
+  "chronos-forecasting",
+  "scipy",
+  "pandas-gbq",
+  "statsmodels",
+  "aiohttp",
+  "beautifulsoup4",
+  "dask[complete]",
+  "db-dtypes",
+  "fsspec",
+  "google-cloud-bigquery",
+  "google-cloud-bigquery-storage",
+  "h5netcdf",
+  "netCDF4",
+  "neuralforecast",
+  "pandera",
+  "pytorch-lightning",
+  "requests",
+  "tensorboard",
+  "tensorboardX",
+  "xarray",
+  "zarr",
+]
+
+[tool.setuptools]
+py-modules = [
+  "mbari_core",
+  "mbari_deep_models",
+  "mbari_drivers_build",
+  "mbari_forecast_v2",
+  "mbari_gpu_analysis",
+  "mbari_neural_forecast",
+  "mbari_split_contracts",
+  "mbari_train",
+]
+
+[tool.setuptools.packages.find]
+where = ["mbari_pipeline", "mbari_experiments"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-q"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+extend-exclude = [
+  "mbari_history",
+  "lakehouse",
+  "nn_results",
+  "nn_cache",
+  "lightning_logs",
+  "bacteria_results",
+]

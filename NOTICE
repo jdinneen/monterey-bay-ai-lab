@@ -1,0 +1,20 @@
+Monterey Bay AI Lab — Ocean Forecasting
+Copyright 2026 Monterey Bay AI Lab contributors
+
+This product includes software developed at the Monterey Bay AI Lab.
+
+Licensed under the Apache License, Version 2.0. See LICENSE.
+
+------------------------------------------------------------------------
+Data attribution (the code license does NOT cover third-party data):
+
+- MBARI M1/M2 mooring data — Monterey Bay Aquarium Research Institute (MBARI),
+  via the OPeNDAP/SSDS service (https://dods.mbari.org/). Subject to MBARI's
+  data use terms.
+- Sea-surface temperature — NASA JPL MUR SST.
+- Buoy / coastal drivers — NOAA NDBC (station 46042), NOAA CO-OPS, NOAA
+  upwelling indices.
+- California beach water-quality observations — CA State Water Resources
+  Control Board / CDPH BeachWatch public records.
+
+See DATA.md for provenance, retrieval, and the terms governing each source.

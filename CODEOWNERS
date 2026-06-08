@@ -1,0 +1,8 @@
+# Default reviewers for all changes. Replace with the real maintainer handle(s).
+# A protected `main` requires review; CODEOWNERS routes the request.
+*       @your-github-handle
+
+# Modeling / promotion logic deserves extra care — keep the honest-baseline gate intact.
+/release_gate/        @your-github-handle
+/ops/seasonal_naive.py        @your-github-handle
+/ops/evidence_gate_agent.py   @your-github-handle
