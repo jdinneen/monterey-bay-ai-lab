@@ -1,0 +1,580 @@
+{
+  "has_rain": true,
+  "min_test_events": 150,
+  "aggregate": {
+    "n_counties": 9,
+    "median_model_ap": 0.5379,
+    "counties_model_beats_ab411": "9/9",
+    "counties_model_beats_memory": "9/9",
+    "counties_deploy_ready": "8/9"
+  },
+  "per_county": [
+    {
+      "county": "San Diego",
+      "n": 26326,
+      "events": 15918,
+      "base_rate": 0.6046,
+      "models": {
+        "model_calibrated": {
+          "n": 26326,
+          "events": 15918,
+          "base_rate": 0.6046,
+          "ap": 0.9568,
+          "roc_auc": 0.9545,
+          "ap_lift_vs_stratum_base": 1.58,
+          "recall_at_10pct": 0.1612,
+          "precision_at_10pct": 0.9749,
+          "recall_at_20pct_fpr": 0.9608,
+          "brier": 0.22672,
+          "ece": 0.3328
+        },
+        "baseline_prior_lab": {
+          "n": 26326,
+          "events": 15918,
+          "base_rate": 0.6046,
+          "ap": 0.881,
+          "roc_auc": 0.8842,
+          "ap_lift_vs_stratum_base": 1.46,
+          "recall_at_10pct": 0.1586,
+          "precision_at_10pct": 0.959,
+          "recall_at_20pct_fpr": 1.0,
+          "brier": 0.11175,
+          "ece": 0.1118
+        },
+        "baseline_station_memory": {
+          "n": 26326,
+          "events": 15918,
+          "base_rate": 0.6046,
+          "ap": 0.9389,
+          "roc_auc": 0.9266,
+          "ap_lift_vs_stratum_base": 1.55,
+          "recall_at_10pct": 0.1615,
+          "precision_at_10pct": 0.9764,
+          "recall_at_20pct_fpr": 0.9025,
+          "brier": 0.29436,
+          "ece": 0.3761
+        },
+        "baseline_ab411_rain": {
+          "n": 26326,
+          "events": 15918,
+          "base_rate": 0.6046,
+          "ap": 0.6022,
+          "roc_auc": 0.4948,
+          "ap_lift_vs_stratum_base": 1.0,
+          "recall_at_10pct": 0.0905,
+          "precision_at_10pct": 0.5475,
+          "recall_at_20pct_fpr": null,
+          "brier": 0.58334,
+          "ece": 0.5833
+        }
+      },
+      "model_beats_memory": true,
+      "model_beats_ab411": true,
+      "deploy_ready": true
+    },
+    {
+      "county": "Los Angeles",
+      "n": 22612,
+      "events": 3588,
+      "base_rate": 0.1587,
+      "models": {
+        "model_calibrated": {
+          "n": 22612,
+          "events": 3588,
+          "base_rate": 0.1587,
+          "ap": 0.5423,
+          "roc_auc": 0.8464,
+          "ap_lift_vs_stratum_base": 3.42,
+          "recall_at_10pct": 0.3796,
+          "precision_at_10pct": 0.6024,
+          "recall_at_20pct_fpr": 0.733,
+          "brier": 0.10162,
+          "ece": 0.0423
+        },
+        "baseline_prior_lab": {
+          "n": 22612,
+          "events": 3588,
+          "base_rate": 0.1587,
+          "ap": 0.2818,
+          "roc_auc": 0.6665,
+          "ap_lift_vs_stratum_base": 1.78,
+          "recall_at_10pct": 0.2991,
+          "precision_at_10pct": 0.4746,
+          "recall_at_20pct_fpr": 1.0,
+          "brier": 0.17792,
+          "ece": 0.1779
+        },
+        "baseline_station_memory": {
+          "n": 22612,
+          "events": 3588,
+          "base_rate": 0.1587,
+          "ap": 0.313,
+          "roc_auc": 0.7469,
+          "ap_lift_vs_stratum_base": 1.97,
+          "recall_at_10pct": 0.2124,
+          "precision_at_10pct": 0.337,
+          "recall_at_20pct_fpr": 0.5201,
+          "brier": 0.12246,
+          "ece": 0.0348
+        },
+        "baseline_ab411_rain": {
+          "n": 22612,
+          "events": 3588,
+          "base_rate": 0.1587,
+          "ap": 0.2514,
+          "roc_auc": 0.6289,
+          "ap_lift_vs_stratum_base": 1.58,
+          "recall_at_10pct": 0.2673,
+          "precision_at_10pct": 0.4241,
+          "recall_at_20pct_fpr": null,
+          "brier": 0.1773,
+          "ece": 0.1773
+        }
+      },
+      "model_beats_memory": true,
+      "model_beats_ab411": true,
+      "deploy_ready": true
+    },
+    {
+      "county": "Orange",
+      "n": 29728,
+      "events": 1709,
+      "base_rate": 0.0575,
+      "models": {
+        "model_calibrated": {
+          "n": 29728,
+          "events": 1709,
+          "base_rate": 0.0575,
+          "ap": 0.3458,
+          "roc_auc": 0.822,
+          "ap_lift_vs_stratum_base": 6.02,
+          "recall_at_10pct": 0.5097,
+          "precision_at_10pct": 0.2931,
+          "recall_at_20pct_fpr": 0.691,
+          "brier": 0.04471,
+          "ece": 0.0097
+        },
+        "baseline_prior_lab": {
+          "n": 29728,
+          "events": 1709,
+          "base_rate": 0.0575,
+          "ap": 0.1003,
+          "roc_auc": 0.5911,
+          "ap_lift_vs_stratum_base": 1.74,
+          "recall_at_10pct": 0.2832,
+          "precision_at_10pct": 0.1629,
+          "recall_at_20pct_fpr": 1.0,
+          "brier": 0.08339,
+          "ece": 0.0834
+        },
+        "baseline_station_memory": {
+          "n": 29728,
+          "events": 1709,
+          "base_rate": 0.0575,
+          "ap": 0.1943,
+          "roc_auc": 0.7315,
+          "ap_lift_vs_stratum_base": 3.38,
+          "recall_at_10pct": 0.3335,
+          "precision_at_10pct": 0.1918,
+          "recall_at_20pct_fpr": 0.5102,
+          "brier": 0.05059,
+          "ece": 0.0064
+        },
+        "baseline_ab411_rain": {
+          "n": 29728,
+          "events": 1709,
+          "base_rate": 0.0575,
+          "ap": 0.1037,
+          "roc_auc": 0.6373,
+          "ap_lift_vs_stratum_base": 1.8,
+          "recall_at_10pct": 0.3136,
+          "precision_at_10pct": 0.1803,
+          "recall_at_20pct_fpr": null,
+          "brier": 0.13634,
+          "ece": 0.1363
+        }
+      },
+      "model_beats_memory": true,
+      "model_beats_ab411": true,
+      "deploy_ready": true
+    },
+    {
+      "county": "San Mateo",
+      "n": 5308,
+      "events": 983,
+      "base_rate": 0.1852,
+      "models": {
+        "model_calibrated": {
+          "n": 5308,
+          "events": 983,
+          "base_rate": 0.1852,
+          "ap": 0.5488,
+          "roc_auc": 0.8339,
+          "ap_lift_vs_stratum_base": 2.96,
+          "recall_at_10pct": 0.3408,
+          "precision_at_10pct": 0.6321,
+          "recall_at_20pct_fpr": 0.7335,
+          "brier": 0.11332,
+          "ece": 0.0293
+        },
+        "baseline_prior_lab": {
+          "n": 5308,
+          "events": 983,
+          "base_rate": 0.1852,
+          "ap": 0.2726,
+          "roc_auc": 0.6344,
+          "ap_lift_vs_stratum_base": 1.47,
+          "recall_at_10pct": 0.1506,
+          "precision_at_10pct": 0.2792,
+          "recall_at_20pct_fpr": 1.0,
+          "brier": 0.22177,
+          "ece": 0.2218
+        },
+        "baseline_station_memory": {
+          "n": 5308,
+          "events": 983,
+          "base_rate": 0.1852,
+          "ap": 0.4176,
+          "roc_auc": 0.7668,
+          "ap_lift_vs_stratum_base": 2.26,
+          "recall_at_10pct": 0.2706,
+          "precision_at_10pct": 0.5019,
+          "recall_at_20pct_fpr": 0.5524,
+          "brier": 0.13162,
+          "ece": 0.0314
+        },
+        "baseline_ab411_rain": {
+          "n": 5308,
+          "events": 983,
+          "base_rate": 0.1852,
+          "ap": 0.2412,
+          "roc_auc": 0.6063,
+          "ap_lift_vs_stratum_base": 1.3,
+          "recall_at_10pct": 0.1404,
+          "precision_at_10pct": 0.2604,
+          "recall_at_20pct_fpr": null,
+          "brier": 0.26696,
+          "ece": 0.267
+        }
+      },
+      "model_beats_memory": true,
+      "model_beats_ab411": true,
+      "deploy_ready": true
+    },
+    {
+      "county": "Long Beach City",
+      "n": 4014,
+      "events": 704,
+      "base_rate": 0.1754,
+      "models": {
+        "model_calibrated": {
+          "n": 4014,
+          "events": 704,
+          "base_rate": 0.1754,
+          "ap": 0.5425,
+          "roc_auc": 0.7623,
+          "ap_lift_vs_stratum_base": 3.09,
+          "recall_at_10pct": 0.3935,
+          "precision_at_10pct": 0.6908,
+          "recall_at_20pct_fpr": 0.5852,
+          "brier": 0.1102,
+          "ece": 0.039
+        },
+        "baseline_prior_lab": {
+          "n": 4014,
+          "events": 704,
+          "base_rate": 0.1754,
+          "ap": 0.2159,
+          "roc_auc": 0.5758,
+          "ap_lift_vs_stratum_base": 1.23,
+          "recall_at_10pct": 0.1804,
+          "precision_at_10pct": 0.3167,
+          "recall_at_20pct_fpr": null,
+          "brier": 0.22745,
+          "ece": 0.2275
+        },
+        "baseline_station_memory": {
+          "n": 4014,
+          "events": 704,
+          "base_rate": 0.1754,
+          "ap": 0.1827,
+          "roc_auc": 0.5077,
+          "ap_lift_vs_stratum_base": 1.04,
+          "recall_at_10pct": 0.1108,
+          "precision_at_10pct": 0.1945,
+          "recall_at_20pct_fpr": 0.2074,
+          "brier": 0.14621,
+          "ece": 0.0388
+        },
+        "baseline_ab411_rain": {
+          "n": 4014,
+          "events": 704,
+          "base_rate": 0.1754,
+          "ap": 0.3691,
+          "roc_auc": 0.7191,
+          "ap_lift_vs_stratum_base": 2.1,
+          "recall_at_10pct": 0.3139,
+          "precision_at_10pct": 0.5511,
+          "recall_at_20pct_fpr": null,
+          "brier": 0.16268,
+          "ece": 0.1627
+        }
+      },
+      "model_beats_memory": true,
+      "model_beats_ab411": true,
+      "deploy_ready": true
+    },
+    {
+      "county": "San Francisco",
+      "n": 4256,
+      "events": 607,
+      "base_rate": 0.1426,
+      "models": {
+        "model_calibrated": {
+          "n": 4256,
+          "events": 607,
+          "base_rate": 0.1426,
+          "ap": 0.5379,
+          "roc_auc": 0.8661,
+          "ap_lift_vs_stratum_base": 3.77,
+          "recall_at_10pct": 0.4234,
+          "precision_at_10pct": 0.6047,
+          "recall_at_20pct_fpr": 0.7957,
+          "brier": 0.10771,
+          "ece": 0.0866
+        },
+        "baseline_prior_lab": {
+          "n": 4256,
+          "events": 607,
+          "base_rate": 0.1426,
+          "ap": 0.2142,
+          "roc_auc": 0.5922,
+          "ap_lift_vs_stratum_base": 1.5,
+          "recall_at_10pct": 0.2603,
+          "precision_at_10pct": 0.3718,
+          "recall_at_20pct_fpr": null,
+          "brier": 0.14944,
+          "ece": 0.1494
+        },
+        "baseline_station_memory": {
+          "n": 4256,
+          "events": 607,
+          "base_rate": 0.1426,
+          "ap": 0.2604,
+          "roc_auc": 0.7099,
+          "ap_lift_vs_stratum_base": 1.83,
+          "recall_at_10pct": 0.1697,
+          "precision_at_10pct": 0.2424,
+          "recall_at_20pct_fpr": 0.4432,
+          "brier": 0.11358,
+          "ece": 0.0108
+        },
+        "baseline_ab411_rain": {
+          "n": 4256,
+          "events": 607,
+          "base_rate": 0.1426,
+          "ap": 0.2732,
+          "roc_auc": 0.7488,
+          "ap_lift_vs_stratum_base": 1.92,
+          "recall_at_10pct": 0.1845,
+          "precision_at_10pct": 0.2635,
+          "recall_at_20pct_fpr": null,
+          "brier": 0.28712,
+          "ece": 0.2871
+        }
+      },
+      "model_beats_memory": true,
+      "model_beats_ab411": true,
+      "deploy_ready": false
+    },
+    {
+      "county": "Santa Cruz",
+      "n": 3931,
+      "events": 415,
+      "base_rate": 0.1056,
+      "models": {
+        "model_calibrated": {
+          "n": 3931,
+          "events": 415,
+          "base_rate": 0.1056,
+          "ap": 0.404,
+          "roc_auc": 0.7763,
+          "ap_lift_vs_stratum_base": 3.83,
+          "recall_at_10pct": 0.4145,
+          "precision_at_10pct": 0.4377,
+          "recall_at_20pct_fpr": 0.6169,
+          "brier": 0.07946,
+          "ece": 0.0228
+        },
+        "baseline_prior_lab": {
+          "n": 3931,
+          "events": 415,
+          "base_rate": 0.1056,
+          "ap": 0.1201,
+          "roc_auc": 0.5445,
+          "ap_lift_vs_stratum_base": 1.14,
+          "recall_at_10pct": 0.1687,
+          "precision_at_10pct": 0.1781,
+          "recall_at_20pct_fpr": 1.0,
+          "brier": 0.17579,
+          "ece": 0.1757
+        },
+        "baseline_station_memory": {
+          "n": 3931,
+          "events": 415,
+          "base_rate": 0.1056,
+          "ap": 0.1631,
+          "roc_auc": 0.6405,
+          "ap_lift_vs_stratum_base": 1.54,
+          "recall_at_10pct": 0.1639,
+          "precision_at_10pct": 0.173,
+          "recall_at_20pct_fpr": 0.3398,
+          "brier": 0.09226,
+          "ece": 0.0164
+        },
+        "baseline_ab411_rain": {
+          "n": 3931,
+          "events": 415,
+          "base_rate": 0.1056,
+          "ap": 0.207,
+          "roc_auc": 0.6997,
+          "ap_lift_vs_stratum_base": 1.96,
+          "recall_at_10pct": 0.2313,
+          "precision_at_10pct": 0.2443,
+          "recall_at_20pct_fpr": null,
+          "brier": 0.1969,
+          "ece": 0.1969
+        }
+      },
+      "model_beats_memory": true,
+      "model_beats_ab411": true,
+      "deploy_ready": true
+    },
+    {
+      "county": "Ventura",
+      "n": 5543,
+      "events": 261,
+      "base_rate": 0.0471,
+      "models": {
+        "model_calibrated": {
+          "n": 5543,
+          "events": 261,
+          "base_rate": 0.0471,
+          "ap": 0.4444,
+          "roc_auc": 0.8846,
+          "ap_lift_vs_stratum_base": 9.44,
+          "recall_at_10pct": 0.5824,
+          "precision_at_10pct": 0.2744,
+          "recall_at_20pct_fpr": 0.8123,
+          "brier": 0.03472,
+          "ece": 0.017
+        },
+        "baseline_prior_lab": {
+          "n": 5543,
+          "events": 261,
+          "base_rate": 0.0471,
+          "ap": 0.0736,
+          "roc_auc": 0.5716,
+          "ap_lift_vs_stratum_base": 1.56,
+          "recall_at_10pct": 0.2069,
+          "precision_at_10pct": 0.0975,
+          "recall_at_20pct_fpr": null,
+          "brier": 0.07379,
+          "ece": 0.0738
+        },
+        "baseline_station_memory": {
+          "n": 5543,
+          "events": 261,
+          "base_rate": 0.0471,
+          "ap": 0.097,
+          "roc_auc": 0.727,
+          "ap_lift_vs_stratum_base": 2.06,
+          "recall_at_10pct": 0.2644,
+          "precision_at_10pct": 0.1245,
+          "recall_at_20pct_fpr": 0.4521,
+          "brier": 0.04414,
+          "ece": 0.0209
+        },
+        "baseline_ab411_rain": {
+          "n": 5543,
+          "events": 261,
+          "base_rate": 0.0471,
+          "ap": 0.1485,
+          "roc_auc": 0.7343,
+          "ap_lift_vs_stratum_base": 3.15,
+          "recall_at_10pct": 0.4789,
+          "precision_at_10pct": 0.2256,
+          "recall_at_20pct_fpr": null,
+          "brier": 0.11077,
+          "ece": 0.1108
+        }
+      },
+      "model_beats_memory": true,
+      "model_beats_ab411": true,
+      "deploy_ready": true
+    },
+    {
+      "county": "Santa Barbara",
+      "n": 3130,
+      "events": 175,
+      "base_rate": 0.0559,
+      "models": {
+        "model_calibrated": {
+          "n": 3130,
+          "events": 175,
+          "base_rate": 0.0559,
+          "ap": 0.2592,
+          "roc_auc": 0.8162,
+          "ap_lift_vs_stratum_base": 4.64,
+          "recall_at_10pct": 0.4514,
+          "precision_at_10pct": 0.2524,
+          "recall_at_20pct_fpr": 0.6629,
+          "brier": 0.04653,
+          "ece": 0.0102
+        },
+        "baseline_prior_lab": {
+          "n": 3130,
+          "events": 175,
+          "base_rate": 0.0559,
+          "ap": 0.085,
+          "roc_auc": 0.5761,
+          "ap_lift_vs_stratum_base": 1.52,
+          "recall_at_10pct": 0.2457,
+          "precision_at_10pct": 0.1374,
+          "recall_at_20pct_fpr": 1.0,
+          "brier": 0.08914,
+          "ece": 0.0891
+        },
+        "baseline_station_memory": {
+          "n": 3130,
+          "events": 175,
+          "base_rate": 0.0559,
+          "ap": 0.1106,
+          "roc_auc": 0.6917,
+          "ap_lift_vs_stratum_base": 1.98,
+          "recall_at_10pct": 0.2629,
+          "precision_at_10pct": 0.147,
+          "recall_at_20pct_fpr": 0.4171,
+          "brier": 0.05176,
+          "ece": 0.0232
+        },
+        "baseline_ab411_rain": {
+          "n": 3130,
+          "events": 175,
+          "base_rate": 0.0559,
+          "ap": 0.099,
+          "roc_auc": 0.6167,
+          "ap_lift_vs_stratum_base": 1.77,
+          "recall_at_10pct": 0.3314,
+          "precision_at_10pct": 0.1853,
+          "recall_at_20pct_fpr": null,
+          "brier": 0.10958,
+          "ece": 0.1096
+        }
+      },
+      "model_beats_memory": true,
+      "model_beats_ab411": true,
+      "deploy_ready": true
+    }
+  ]
+}

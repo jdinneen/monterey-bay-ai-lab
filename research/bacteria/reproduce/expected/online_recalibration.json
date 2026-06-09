@@ -1,0 +1,86 @@
+{
+  "lag_days": 2,
+  "block_freq": "M",
+  "strata": {
+    "ALL": {
+      "n": 118247,
+      "events": 26659,
+      "static": {
+        "ap": 0.7585,
+        "ece": 0.0687
+      },
+      "online": {
+        "ap": 0.7611,
+        "ece": 0.0138
+      },
+      "station_memory_ece": 0.0883,
+      "static_deploy_ready": true,
+      "online_deploy_ready": true,
+      "online_fixes_calibration": true
+    },
+    "EXCLUDE_SAN_DIEGO": {
+      "n": 91825,
+      "events": 10626,
+      "static": {
+        "ap": 0.4978,
+        "ece": 0.0088
+      },
+      "online": {
+        "ap": 0.4996,
+        "ece": 0.0327
+      },
+      "station_memory_ece": 0.0082,
+      "static_deploy_ready": true,
+      "online_deploy_ready": true,
+      "online_fixes_calibration": false
+    },
+    "SAN_DIEGO": {
+      "n": 26422,
+      "events": 16033,
+      "static": {
+        "ap": 0.9494,
+        "ece": 0.2852
+      },
+      "online": {
+        "ap": 0.9504,
+        "ece": 0.1735
+      },
+      "station_memory_ece": 0.3696,
+      "static_deploy_ready": true,
+      "online_deploy_ready": true,
+      "online_fixes_calibration": true
+    },
+    "SAN_FRANCISCO": {
+      "n": 4256,
+      "events": 656,
+      "static": {
+        "ap": 0.5875,
+        "ece": 0.0783
+      },
+      "online": {
+        "ap": 0.5723,
+        "ece": 0.1454
+      },
+      "station_memory_ece": 0.0196,
+      "static_deploy_ready": false,
+      "online_deploy_ready": false,
+      "online_fixes_calibration": false
+    },
+    "MONTEREY": {
+      "n": 5298,
+      "events": 534,
+      "static": {
+        "ap": 0.3837,
+        "ece": 0.0235
+      },
+      "online": {
+        "ap": 0.3789,
+        "ece": 0.0589
+      },
+      "station_memory_ece": 0.0118,
+      "static_deploy_ready": true,
+      "online_deploy_ready": true,
+      "online_fixes_calibration": false
+    }
+  }
+}

@@ -1,0 +1,10 @@
+# Reproduction environment for the California marine-enterococcus nowcasting benchmark.
+# Versions pinned to the exact environment that produced reproduce/expected/.
+# Install into a clean venv:  python -m venv .venv && pip install -r requirements.txt
+#
+# Python 3.12.10 (any 3.12.x should match; scikit-learn version is the one that
+# matters for HistGradientBoosting + isotonic reproducibility).
+scikit-learn==1.9.0
+pandas==2.3.3
+numpy==2.4.6
+pyarrow==24.0.0
