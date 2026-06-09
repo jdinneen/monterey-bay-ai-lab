@@ -1,0 +1,27 @@
+{
+  "model": {
+    "input_dim": 256,
+    "hidden_dim": 512,
+    "num_experts": 16,
+    "num_layers": 3
+  },
+  "training": {
+    "batch_size": 32,
+    "learning_rate": 0.0001,
+    "weight_decay": 0.1,
+    "grad_accum_steps": 4,
+    "max_grad_norm": 1.0
+  },
+  "continual_learning": {
+    "replay_size": 1000,
+    "ewc_elasticity": 1000.0,
+    "fisher_samples": 100
+  },
+  "monitoring": {
+    "checkpoint_dir": "checkpoints",
+    "log_interval": 100,
+    "eval_interval": 500
+  },
+  "mixed_precision": true,
+  "device": "cuda"
+}

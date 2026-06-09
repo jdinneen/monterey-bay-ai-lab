@@ -42,3 +42,9 @@ mbari_data_profile/
 
 # Multi-agent file-claim locks (runtime, never tracked)
 .agent_locks/
+
+# SOTA continual-learning training outputs — never track (multi-GB)
+sota_continual_learning/output_production/
+sota_continual_learning/checkpoints/
+sota_continual_learning/*.log
+*.pt
