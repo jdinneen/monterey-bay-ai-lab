@@ -5,11 +5,11 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "mbari-ai-forecasting"
 version = "0.1.0"
-description = "Local MBARI ocean forecasting, model validation, and release-gate tooling."
+description = "Reproducible Monterey Bay ocean forecasting experiments with honest naive-baseline evaluation."
 requires-python = ">=3.12"
 readme = "README.md"
-license = { text = "Proprietary" }
-authors = [{ name = "Local MBARI AI project" }]
+license = { text = "Apache-2.0" }
+authors = [{ name = "Monterey Bay Ocean Forecasting Lab" }]
 dependencies = [
   "duckdb",
   "numpy",
