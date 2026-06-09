@@ -1,55 +1,82 @@
-# Monterey Bay AI Lab — Ocean Forecasting
+# Monterey Bay Ocean Forecasting Lab  *(DRAFT — public-readiness rewrite)*
 
-Local, portable ocean forecasting for the Monterey Bay (MBARI M1/M2 moorings) plus a
-statewide California beach water-quality (bacteria exceedance) model. Built **like** a
-production lakehouse (bronze/silver/gold, deterministic split contracts, run manifests) on
-local/portable compute — no managed-product dependency.
+Reproducible experiments for forecasting Monterey Bay ocean conditions from **public**
+oceanographic and coastal water-quality data. The emphasis is on **honest baselines,
+reproducible data splits, and transparent results — including negative ones.**
 
-What makes this different from a typical model dump: **honest evaluation is enforced in
-code.** A model is only "promoted" if it beats the *better of persistence and seasonal-naive*
-(same-hour-yesterday) — persistence alone is a free lunch at daily horizons. The promotion
-matrix, champion selector, and evidence gate all enforce this; see `AGENTS.md` and
-`research/model_lab/HONEST_SKILL_BASELINE.md`.
+> **Not affiliated with MBARI.** This is an independent research/engineering project that
+> *uses* publicly available oceanographic data (including MBARI M1/M2 mooring data and other
+> public sources). It is **not affiliated with, sponsored by, or endorsed by** MBARI or any
+> data provider. "MBARI" is used only to describe data sources.
+
+## What this is
+- A portable, lakehouse-style data + modeling pipeline (bronze/silver/gold layering,
+  deterministic split contracts, run manifests) that runs on local/portable compute — with
+  no managed-product dependency.
+- Forecasting experiments (classical baselines, gradient-boosted and neural models, and a
+  continual-learning experiment) for Monterey Bay hourly series and a statewide California
+  beach water-quality (bacteria-exceedance) task.
+- An **honest-evaluation harness**: a model is "promoted" only if it beats the *better of
+  persistence and seasonal-naive* (same-hour-yesterday). This is enforced in code, not just
+  documented.
+
+## What this is *not*
+- **Not** an operational or deployed forecasting service.
+- **Not** a state-of-the-art result. The continual-learning experiment **does not beat** the
+  seasonal-naive baseline (see its `RESULTS.md`); it is published as a transparent negative
+  result.
+- **Not** affiliated with MBARI or any data provider.
+- **Not** a redistribution of any dataset — no third-party data ships with this repo.
+
+## Datasets
+Public oceanographic and coastal sources (e.g. MBARI M1/M2 mooring data, NOAA products, and
+state water-quality data). Each provider's own terms apply — see **[DATA.md](DATA.md)**.
+Data is **not** included in this repository.
+
+## Reproducibility status
+Research-grade and reproducible — *not* production. A portable smoke pipeline and a unit
+suite validate the evaluation gates; some model claims are explicitly marked not-yet-approved.
+
+## Honest baseline methodology
+Forecast skill is measured against the **better of persistence and seasonal-naive**
+(same-hour-yesterday), because persistence alone gets a free pass at daily horizons. The
+gate is enforced in code:
+- `ops/seasonal_naive.py` — best-naive scorer
+- `release_gate/mbari_promotion_matrix.py` — gated promotion decisions
+- `ops/evidence_gate_agent.py` — fails dishonest promotions
 
 ## Quickstart
-
 ```bash
 pip install -e .[test]
-python ops/run_tests.py                  # unit suite
+python ops/run_tests.py        # unit / gate suite
 ```
+The repo ships **no data or trained artifacts**, so training/evaluation require you to point
+the pipeline at your own copy of the public datasets (below). A small synthetic/demo path so
+the repo runs end-to-end without private data is planned.
 
-Configure data locations via environment variables (nothing is hardcoded):
-
+## Use your own data
+Everything is configured via environment variables (nothing is hardcoded):
 ```
 MBARI_PROJECT_ROOT   MBARI_SOURCE_PARQUET   MBARI_CACHE_DIR
 MBARI_LAKEHOUSE_DIR  MBARI_GCP_PROJECT
 ```
 
-Curated data + model artifacts ship as a separate data release (see `DATA.md`).
+## Known limitations
+- Models do **not** yet beat strong naive baselines on the headline series (honest negative
+  result — that's the point).
+- Tested on a single consumer NVIDIA GPU; not validated across hardware.
+- No bundled demo dataset yet (see Quickstart).
 
-## The pipeline (gates & decisions)
+## License & data terms
+- **Code:** Apache-2.0 (see `LICENSE`).
+- **Data, model outputs, and trained checkpoints:** **not** covered by the code license;
+  each remains subject to its provider's terms. Verify before any redistribution or
+  commercial use. See **[DATA.md](DATA.md)**.
 
-```
-build panel ─► train/benchmark ─► gold metrics ─► promotion matrix ─► champion selector
-                                       │                  │
-                              best-naive backfill   evidence gate (fails on dishonest promotion)
-```
+> NOTE TO MAINTAINER (remove before publishing): `pyproject.toml` currently declares the
+> license as "Proprietary", which contradicts the Apache-2.0 stated here and in `LICENSE`.
+> Reconcile these before this repo is presented as open source.
 
-- `ops/seasonal_naive.py` — best-naive scorer (persistence vs seasonal-naive)
-- `ops/backfill_seasonal_naive.py` — enriches gold metrics
-- `release_gate/mbari_promotion_matrix.py` — gated promotion decisions
-- `ops/build_champion_selector.py` — per target/horizon champions
-- `ops/evidence_gate_agent.py`, `ops/data_health_agent.py` — auditable gates
-- `ops/agent_lock.py` — cooperative file locks for multi-agent development
-
-## Key docs
-
-- `PRODUCTION_READINESS.md` — what's defensible vs not-yet-approved
-- `MBARI_PRODUCTION_LAKEHOUSE_CONTRACTS.md` — layer contracts & guarantees
-- `AGENTS.md` — binding invariants (incl. the best-naive gate)
-- `DATA.md` — data provenance & license (code license ≠ data terms)
-
-## Contributing
-
-PRs welcome — trunk-based, squash-merge, DCO sign-off (`git commit -s`). See
-`CONTRIBUTING.md`. Licensed under **Apache-2.0** (`LICENSE`).
+## Disclaimer
+Independent project; not affiliated with, sponsored by, or endorsed by MBARI or any data
+provider. Provided "as is", without warranty of any kind.
