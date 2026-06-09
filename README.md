@@ -1,4 +1,4 @@
-# Monterey Bay Ocean Forecasting Lab  *(DRAFT — public-readiness rewrite)*
+# Monterey Bay Ocean Forecasting Lab
 
 Reproducible experiments for forecasting Monterey Bay ocean conditions from **public**
 oceanographic and coastal water-quality data. The emphasis is on **honest baselines,
@@ -73,9 +73,6 @@ MBARI_LAKEHOUSE_DIR  MBARI_GCP_PROJECT
   each remains subject to its provider's terms. Verify before any redistribution or
   commercial use. See **[DATA.md](DATA.md)**.
 
-> NOTE TO MAINTAINER (remove before publishing): `pyproject.toml` currently declares the
-> license as "Proprietary", which contradicts the Apache-2.0 stated here and in `LICENSE`.
-> Reconcile these before this repo is presented as open source.
 
 ## Disclaimer
 Independent project; not affiliated with, sponsored by, or endorsed by MBARI or any data
