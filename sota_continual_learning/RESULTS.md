@@ -8,9 +8,13 @@ An honest evaluation of the continual-learning Mixture-of-Experts model in
   with EWC + experience replay (`core.py`).
 - **Task:** 24-hour-ahead forecast of the observed value `y`, autoregressive
   (past `y` -> future `y`), per-window z-scored, across 24 Monterey Bay series.
-- **Data:** lakehouse gold `forecast_predictions` (~6.9M rows; data not included).
+- **Data:** lakehouse gold `forecast_predictions` (~6.9M rows; not distributed).
 - **Baseline:** seasonal-naive (same-hour-yesterday) — the bar required by AGENTS.md.
-- **Reproduce:** `python sota_continual_learning/evaluate.py`
+- **Reproduce:** train first with
+  `python sota_continual_learning/run_production.py`, then
+  `python sota_continual_learning/evaluate.py --checkpoint <final.pt>`.
+  Requires a trained checkpoint (not distributed) and the gold parquet (see
+  `../DATA.md`); it will not run out of the box without both.
 
 ## Result (honest)
 | Metric | Value |

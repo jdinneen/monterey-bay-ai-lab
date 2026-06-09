@@ -1,60 +1,48 @@
-# SOTA Continual Learning System for RTX 5090
+# Continual-Learning MoE (Monterey Bay AI Lab)
 
-A state-of-the-art, continuously learning ML architecture designed to leverage the full power of RTX 5090.
+A continuously-learning Mixture-of-Experts (MoE) time-series model with Elastic
+Weight Consolidation (EWC) and experience replay, built to run on a single
+RTX 5090.
 
-## Architecture Overview
+> **Results, up front (see [RESULTS.md](RESULTS.md)).** On the 24 Monterey Bay
+> hourly series this model **does not beat a seasonal-naive (same-hour-yesterday)
+> baseline** — it wins on only 2/24 series, median skill -0.45. The low absolute
+> MAPE (~0.65%) is misleading because naive already scores ~0.56%. This code is
+> published for transparency and reuse, **not** as a state-of-the-art forecasting
+> claim.
 
-### Core Components
+## Architecture
+- **Dynamic Mixture-of-Experts** (`core.py`): expert feed-forward networks with a
+  learned top-k router plus always-on "regular" experts for stability.
+- **Continual-learning stack**: Elastic Weight Consolidation (EWC) and an
+  experience-replay buffer (reservoir sampling), intended to reduce catastrophic
+  forgetting across tasks.
+- **Training** (`trainer.py`): mixed precision (bfloat16) and gradient
+  accumulation, a launch-time VRAM admission guard (`ops/gpu_admission.py`), and a
+  runtime `SafetyMonitor` (VRAM / runtime / idle limits).
 
-1. **Dynamic Mixture-of-Experts (MoE)**
-   - 16+ experts with dynamic routing
-   - Expert specialization via clustering  
-   - Load balancing and routing optimization
-
-2. **Continual Learning Stack**
-   - Elastic Weight Consolidation (EWC)
-   - Experience replay buffer with Reservoir Sampling
-   - Task-incremental learning (class/function separation)
-
-3. **Optimization Engine**
-   - Full FP16/bfloat16 support for RTX 5090
-   - Gradient checkpointing for memory efficiency
-   - Distributed training ready (DDP/FSDP)
-
-### Learning Modes
-
-- **Online Learning**: Stream data continuously, learning without pauses
-- **Active Learning**: Query high-value samples for labels
-- **Meta-Learning**: Optimize its own architecture over time
-- **Self-Supervised**: Pre-train on unlabelled data, fine-tune on labelled
-
-## Quick Start
-
+## Quick start
 ```bash
-# Install dependencies
 pip install -r requirements.txt
 
-# Run continual learning training
-python main.py --mode online --data-path /path/to/data
+# Smoke test on a few series (needs the gold parquet; see ../DATA.md)
+python sota_continual_learning/smoke_test_production.py --steps 20 --context-window 168 --batch-size 2
 
-# Monitor learning progress
-python monitor.py  # TensorBoard dashboard
+# Production training run
+python sota_continual_learning/run_production.py --total-steps 10000 --batch-size 2 --context-window 168
 
-#Export optimized model
-python export.py --checkpoint checkpoints/latest.pt
+# Honest evaluation vs seasonal-naive (needs a trained checkpoint)
+python sota_continual_learning/evaluate.py --checkpoint sota_continual_learning/output_production/checkpoints/final.pt
 ```
 
-## Key Features
+Data and trained checkpoints are **not** distributed with this repo (see
+`../DATA.md`); train first, then evaluate.
 
-- **Zero-Catastrophic-Forgetting**: EWC + replay buffers preserve prior knowledge
-- **Scalable to 5090**: Efficiently uses 24GB+ VRAM with MoE architecture
-- **Self-Improving**: Meta-learning loop continuously optimizes hyperparameters
-- **Multi-Task Ready**: Same architecture for seq prediction, classification, regression
+## Methods
+This combines established techniques rather than novel ones:
+- **Sparse Mixture-of-Experts** routing (top-k expert selection).
+- **Elastic Weight Consolidation** (EWC) for continual learning
+  (Kirkpatrick et al., *PNAS* 2017).
+- **Experience replay** via reservoir sampling.
 
-## Research Background
-
-Based on SOTA approaches:
-- DeepMoE: Dynamic routing for large-scale experts (arXiv:2406.05397)
-- i-DROPS: Incremental learning with drop-based regularization
-- Self-Supervised Replay: Generating synthetic samples to preserve knowledge
-- Adaptive Gradient Meta-Learning: Learning rate and architecture optimization
+See [RESULTS.md](RESULTS.md) for the measured outcome and reproduction notes.
