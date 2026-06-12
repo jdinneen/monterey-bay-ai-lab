@@ -10,11 +10,11 @@ from pathlib import Path
 
 import pandas as pd
 
-from mbari_split_contracts import build_split_contract, write_split_contract
+from mbal_split_contracts import build_split_contract, write_split_contract
 
-PROJECT_ROOT = Path(os.environ.get("MBARI_PROJECT_ROOT", Path(__file__).resolve().parents[2])).resolve()
+PROJECT_ROOT = Path(os.environ.get("MBAL_PROJECT_ROOT", Path(__file__).resolve().parents[2])).resolve()
 LAKEHOUSE = PROJECT_ROOT / "lakehouse"
-SOURCE_PARQUET = PROJECT_ROOT / "mbari_pipeline" / "curated_history"
+SOURCE_PARQUET = PROJECT_ROOT / "mbal_pipeline" / "curated_history"
 
 def generate_golden_splits():
     # We define the Golden Era explicitly as 2004-10-01 to 2011-12-31.

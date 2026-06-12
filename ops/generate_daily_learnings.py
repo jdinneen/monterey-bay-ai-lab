@@ -304,7 +304,7 @@ def render_report(
         "Next Experiments": line_list(next_items),
     }
 
-    output = ["# MBARI AI Daily Learnings"]
+    output = ["# Monterey Bay AI Lab Daily Learnings"]
     for section in SECTION_ORDER:
         output.extend(["", f"## {section}", "", sections[section]])
     return "\n".join(output).rstrip() + "\n"
@@ -325,13 +325,13 @@ def generate_daily_learnings(project_root: Path, output: Path) -> str:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Generate the MBARI AI daily learnings report.")
+    parser = argparse.ArgumentParser(description="Generate the Monterey Bay AI Lab daily learnings report.")
     parser.add_argument("--project-root", type=Path, default=Path.cwd())
     parser.add_argument(
         "--output",
         type=Path,
         default=None,
-        help="Output markdown path. Defaults to <project-root>/archive/reports/MBARI_AI_DAILY_LEARNINGS.md.",
+        help="Output markdown path. Defaults to <project-root>/archive/reports/MBAL_AI_DAILY_LEARNINGS.md.",
     )
     return parser
 
@@ -339,7 +339,7 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
-    output = args.output or (args.project_root / "archive" / "reports" / "MBARI_AI_DAILY_LEARNINGS.md")
+    output = args.output or (args.project_root / "archive" / "reports" / "MBAL_AI_DAILY_LEARNINGS.md")
     generate_daily_learnings(args.project_root, output)
     print(output)
     return 0

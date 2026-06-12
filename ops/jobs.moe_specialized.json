@@ -1,0 +1,42 @@
+{
+  "_comment": "MoE Transformer training jobs with specialized expert configurations",
+  "jobs": [
+    {
+      "label": "moe_8experts_baseline",
+      "model": "mbal_moe",
+      "outdir": "moe_8experts_baseline",
+      "extra_args": [
+        "--max-steps", "1500",
+        "--n-windows", "52",
+        "--batch-size", "16",
+        "-windows-batch-size", "128"
+      ],
+      "profile": "medium"
+    },
+    {
+      "label": "moe_16experts_expand",
+      "model": "mbal_moe",
+      "outdir": "moe_16experts_expand",
+      "extra_args": [
+        "--max-steps", "2000",
+        "--n-windows", "78",
+        "--batch-size", "12",
+        "--windows-batch-size", "96"
+      ],
+      "profile": "large"
+    },
+    {
+      "label": "moe_smoke_test",
+      "model": "mbal_moe",
+      "outdir": "moe_smoke_test",
+      "extra_args": [
+        "--smoke",
+        "--max-steps", "50",
+        "--n-windows", "3",
+        "--series", "temp_d10p0", "sal_d10p0",
+        "--batch-size", "8"
+      ],
+      "profile": "safe"
+    }
+  ]
+}

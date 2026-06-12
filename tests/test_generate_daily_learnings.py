@@ -224,7 +224,7 @@ def test_cli_writes_requested_output(tmp_path):
 
     assert str(output) in completed.stdout
     assert output.exists()
-    assert "MBARI AI Daily Learnings" in output.read_text(encoding="utf-8")
+    assert "Monterey Bay AI Lab Daily Learnings" in output.read_text(encoding="utf-8")
 
 
 def _run_without_pytest() -> int:

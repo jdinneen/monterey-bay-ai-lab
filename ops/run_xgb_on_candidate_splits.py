@@ -25,14 +25,14 @@ from sklearn.metrics import mean_absolute_error, root_mean_squared_error
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from mbari_forecast_v2 import (
+from mbal_forecast_v2 import (
     RANDOM_STATE,
     build_causal_features,
     build_hourly_matrix,
     load_source,
     variable_of,
 )
-from mbari_core import apply_physical_quality_filters
+from mbal_core import apply_physical_quality_filters
 
 
 DEFAULT_RUN_PREFIX = "xgb_shared"
@@ -65,7 +65,7 @@ def xgb_params(device: str, n_estimators: int) -> dict[str, Any]:
 
 
 def load_matrix(project_root: Path) -> pd.DataFrame:
-    source = project_root / "mbari_history" / "opendap" / "m1_history.parquet"
+    source = project_root / "mbal_history" / "opendap" / "m1_history.parquet"
     raw = load_source("parquet", str(source), None)
     filtered = apply_physical_quality_filters(raw)
     clean = filtered[0] if isinstance(filtered, tuple) else filtered
@@ -85,7 +85,7 @@ def load_split_rows(project_root: Path, split_id: str) -> pd.DataFrame:
 def select_jobs(project_root: Path, max_jobs: int | None = None) -> list[Job]:
     matrix_path = project_root / "lakehouse" / "gold" / "promotion_matrix" / "promotion_matrix.parquet"
     if not matrix_path.exists():
-        raise FileNotFoundError("promotion_matrix.parquet missing; run release_gate/mbari_promotion_matrix.py first")
+        raise FileNotFoundError("promotion_matrix.parquet missing; run release_gate/mbal_promotion_matrix.py first")
     promo = pd.read_parquet(matrix_path)
     candidates = promo[promo["status"].eq("candidate_split_mismatch")].copy()
     if candidates.empty:

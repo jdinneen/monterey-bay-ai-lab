@@ -7,5 +7,5 @@
       "extra_args": ["--smoke", "--max-steps", "10", "--n-windows", "3", "--series", "air_pressure"]
     }
   ],
-  "_comment": "Portable smoke contract: tiny CPU-safe run with portable paths. Set MBARI_PROJECT_ROOT, MBARI_SOURCE_PARQUET, MBARI_CACHE_DIR, and MBARI_LAKEHOUSE_DIR in the environment."
+  "_comment": "Portable smoke contract: tiny CPU-safe run with portable paths. Set MBAL_PROJECT_ROOT, MBAL_SOURCE_PARQUET, MBAL_CACHE_DIR, and MBAL_LAKEHOUSE_DIR in the environment."
 }

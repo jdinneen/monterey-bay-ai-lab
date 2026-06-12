@@ -10,26 +10,6 @@
         "--drivers-manifest", "nn_cache/drivers_manifest.json"
       ],
       "profile": "safe"
-    },
-    {
-      "label": "tft+drv",
-      "model": "tft",
-      "outdir": "tft_drv",
-      "extra_args": [
-        "--drivers-parquet", "nn_cache/drivers_hourly.parquet",
-        "--drivers-manifest", "nn_cache/drivers_manifest.json"
-      ],
-      "profile": "safe"
-    },
-    {
-      "label": "nbeatsx+drv",
-      "model": "nbeatsx",
-      "outdir": "nbeatsx_drv",
-      "extra_args": [
-        "--drivers-parquet", "nn_cache/drivers_hourly.parquet",
-        "--drivers-manifest", "nn_cache/drivers_manifest.json"
-      ],
-      "profile": "safe"
     }
   ]
 }

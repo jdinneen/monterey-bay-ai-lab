@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Cooperative file-claim locks for the MBARI multi-agent repo.
+"""Cooperative file-claim locks for the Monterey Bay AI Lab multi-agent repo.
 
 Multiple autonomous agents (Codex / Claude / Gemini / Qwen) share one working
 tree and step on each other: two agents edit the same file, one clobbers the
@@ -53,6 +53,8 @@ def _normalize(path: str) -> str:
 
 
 def _rel(path: str) -> str:
+    if path.startswith("TASK:"):
+        return path
     p = Path(_normalize(path))
     if not p.is_absolute():
         p = (Path.cwd() / p)
@@ -64,21 +66,20 @@ def _rel(path: str) -> str:
 
 
 def _lock_file(rel: str) -> Path:
+    # Namespace separation for tasks vs paths
+    prefix = "task_" if rel.startswith("TASK:") else "path_"
     digest = hashlib.sha1(rel.encode("utf-8")).hexdigest()[:16]
-    return LOCK_DIR / f"{digest}.json"
+    return LOCK_DIR / f"{prefix}{digest}.json"
 
 
 def _is_stale(rec: dict) -> bool:
     """A claim is stale once its TTL passes.
 
-    Liveness is intentionally TTL-based, not PID-based: claims are written by
-    short-lived CLI / hook subprocesses, so the recorded PID is dead almost
-    immediately and would make every lock look stale. An active agent keeps its
-    claims fresh by editing (the hook refreshes the TTL); a crashed or idle
-    agent's claims simply expire after the TTL. ``pid``/``host`` are recorded
-    for visibility only.
+    Uses ``<=`` so a lock that has reached its exact expiry instant is stale: on
+    Windows ``time.time()`` has ~15ms granularity, so a ttl=0 claim and a check in
+    the same tick share a timestamp; strict ``<`` would wrongly read it as live.
     """
-    return float(rec.get("expires_at", 0)) < _now()
+    return float(rec.get("expires_at", 0)) <= _now()
 
 
 def _read(lock_file: Path) -> dict | None:
@@ -88,7 +89,34 @@ def _read(lock_file: Path) -> dict | None:
         return None
 
 
-def _write(lock_file: Path, rec: dict) -> None:
+def _write_atomic(lock_file: Path, rec: dict) -> bool:
+    """Write a lock file atomically. Returns True on success, False if already exists."""
+    LOCK_DIR.mkdir(exist_ok=True)
+    data = json.dumps(rec, indent=2, sort_keys=True).encode("utf-8")
+    
+    # Use O_EXCL to ensure atomic creation (fails if file exists)
+    try:
+        fd = os.open(lock_file, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+        with os.fdopen(fd, 'wb') as f:
+            f.write(data)
+        return True
+    except FileExistsError:
+        # Check if the existing lock is stale or belongs to the same agent
+        existing = _read(lock_file)
+        if existing and (_is_stale(existing) or existing.get("agent") == rec.get("agent")):
+            # Overwrite stale lock or refresh own lock
+            tmp = lock_file.with_suffix(".json.tmp")
+            tmp.write_text(json.dumps(rec, indent=2, sort_keys=True), encoding="utf-8")
+            os.replace(tmp, lock_file)
+            return True
+        return False
+    except OSError as e:
+        print(f"CRITICAL: Filesystem error while writing lock: {e}", file=sys.stderr)
+        return False
+
+
+def _write_simple(lock_file: Path, rec: dict) -> None:
+    """Non-exclusive write (for refreshes)."""
     LOCK_DIR.mkdir(exist_ok=True)
     tmp = lock_file.with_suffix(".json.tmp")
     tmp.write_text(json.dumps(rec, indent=2, sort_keys=True), encoding="utf-8")
@@ -103,7 +131,7 @@ def _refresh_agent(agent: str) -> None:
         rec = _read(lock_file)
         if rec and rec.get("agent") == agent and not _is_stale(rec):
             rec["expires_at"] = _now() + DEFAULT_TTL
-            _write(lock_file, rec)
+            _write_simple(lock_file, rec)
 
 
 def _holder(rel: str, agent: str) -> dict | None:
@@ -138,6 +166,7 @@ def claim(paths: list[str], agent: str, task: str, ttl: int) -> int:
             "expires_at": _now() + ttl,
         }
         to_write.append((_lock_file(rel), rec))
+    
     if conflicts:
         for c in conflicts:
             mins = max(0, int((float(c["expires_at"]) - _now()) / 60))
@@ -146,9 +175,21 @@ def claim(paths: list[str], agent: str, task: str, ttl: int) -> int:
                 file=sys.stderr,
             )
         return 2
+    
+    # Final atomic write check
+    successfully_claimed = []
     for lock_file, rec in to_write:
-        _write(lock_file, rec)
-    print(json.dumps({"claimed": [r["path"] for _, r in to_write], "agent": agent}, sort_keys=True))
+        if _write_atomic(lock_file, rec):
+            successfully_claimed.append(rec["path"])
+        else:
+            # Race condition lost!
+            print(f"CONFLICT: Race condition lost for {rec['path']}. Another agent was faster.", file=sys.stderr)
+            # Rollback any partial claims in this turn
+            for path_to_undo in successfully_claimed:
+                _lock_file(path_to_undo).unlink(missing_ok=True)
+            return 2
+            
+    print(json.dumps({"claimed": successfully_claimed, "agent": agent}, sort_keys=True))
     return 0
 
 
@@ -251,19 +292,29 @@ def guard() -> int:
                 file=sys.stderr,
             )
             return 2
-        # Free / mine / stale -> (re)claim and refresh the TTL.
-        _write(
-            _lock_file(rel),
-            {
-                "path": rel,
-                "agent": agent,
-                "task": str(payload.get("task") or "claude edit session"),
-                "pid": os.getpid(),
-                "host": HOST,
-                "created_at": _now(),
-                "expires_at": _now() + DEFAULT_TTL,
-            },
-        )
+        # Free / mine / stale -> atomically (re)claim. _write_atomic uses O_EXCL on
+        # creation and only returns False when a *live foreign* lock exists, so this
+        # closes the check-then-write TOCTOU: if another agent claimed the file between
+        # our _holder() check above and this write, we lose the race and block instead
+        # of clobbering their claim (last-writer-wins is what the old _write_simple did).
+        rec = {
+            "path": rel,
+            "agent": agent,
+            "task": str(payload.get("task") or "claude edit session"),
+            "pid": os.getpid(),
+            "host": HOST,
+            "created_at": _now(),
+            "expires_at": _now() + DEFAULT_TTL,
+        }
+        if not _write_atomic(_lock_file(rel), rec):
+            other = _read(_lock_file(rel))
+            holder_agent = (other or {}).get("agent", "another agent")
+            print(
+                f"[agent-lock] BLOCKED: {rel} was just claimed by another agent "
+                f"('{holder_agent}') in a race. Work on a different file.",
+                file=sys.stderr,
+            )
+            return 2
         # The agent is clearly alive: extend all of its other claims too, so a
         # long edit on one file does not let another agent's claim expire.
         _refresh_agent(agent)

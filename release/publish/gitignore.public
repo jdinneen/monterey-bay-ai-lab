@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+env/
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Data & model artifacts — shipped as a versioned data release, not in git (see DATA.md)
+*.parquet
+*.csv
+*.jsonl
+*.tfevents.*
+nn_cache/
+nn_results/
+lightning_logs/
+mbal_history/
+lakehouse/
+reports/
+bacteria_results/
+viz_output/
+mbal_*_results/
+mbal_data_profile/
+
+# Logs & run state
+*.log
+*.pid
+
+# Multi-agent file-claim locks (runtime, never tracked)
+.agent_locks/

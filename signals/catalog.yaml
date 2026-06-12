@@ -1,0 +1,382 @@
+# Monterey Bay AI Lab — Signal Catalog (single source of truth)
+#
+# One entry per SIGNAL we have touched. The catalog RECORDS; the gate
+# (research/bacteria/signal_lab.py: temporal ΔAP >= 0.005 AND survives leave-one-beach-out)
+# DECIDES promotion into any model. A catalog entry is metadata, NOT a materialized lakehouse
+# row. Log the NULLS too — "tested, washed" is as valuable as a hit.
+#
+# Each signal records, in plain language: what it CAPTURES, what it DOES, what it DOES_NOT do,
+# WHY (the mechanism behind the verdict), and REVISIT_WHEN (the specific condition that would
+# change a verdict — the forward-looking, actionable part). predictive_value maps each target to
+# a status + measured metric + evidence file.
+#
+# Never conflate "predicts X" (measured skill for its own target → PRIMARY/KEEP) with "improves
+# Y" (lifts a DIFFERENT target when combined → separate gated test, default UNTESTED). Coverage
+# is first-class: a real signal with thin coverage cannot move a broad target.
+#
+# status enum (per target):
+#   PRIMARY  - this signal IS (the core of) the validated model for that target
+#   KEEP     - passed the gate as a feature (ΔAP>=0.005 + survives LOBO)
+#   WASH     - tested as a feature, no lift (|ΔAP|<0.005 or sign-flips across strata)
+#   REJECT   - tested, regressed the target (ΔAP < -0.005)
+#   UNTESTED - plausible but NOT yet gated for that target
+#   PLANNED  - identified, not yet fetched/built
+# modality enum: meteorological | hydrological | oceanographic | biological | event | derived | lab
+
+meta:
+  gate: "research/bacteria/signal_lab.py — temporal ΔAP >= 0.005 AND survives leave-one-beach-out"
+  rule: "catalog records; the gate decides promotion into any model. log nulls too."
+  targets:
+    bacteria_exceedance:
+      what: "Will a beach's water exceed the AB411 enterococcus standard (>104 MPN/100mL)?"
+      best_model: "statewide HGBT + isotonic (research/bacteria/operational_benchmark.py)"
+      headline: "EXCLUDE_SAN_DIEGO calibrated AP ~0.47 / ROC-AUC ~0.86; deploy-ready 8/9 counties"
+      baseline_to_beat: "seasonal-naive + station-memory + AB411 rain rule"
+      coverage: "~830 statewide beaches, 2005-2026"
+    domoic_acid:
+      what: "Will a pier's next sample exceed particulate domoic acid 500 ng/L (=0.5 ng/mL)?"
+      best_model: "DA+precursor HGBT (research/hab/da_forecast.py), ~1-week lead"
+      headline: "AP 0.232 / ROC-AUC 0.831 time-holdout; beats seasonal-naive 8/8 and C-HARM 8/8 piers"
+      baseline_to_beat: "seasonal-naive + persistence; NOAA C-HARM (operational)"
+      coverage: "17 CalHABMAP piers only, weekly, 2005-2026"
+
+signals:
+  - name: station_lab_history
+    modality: lab
+    captures: Per-station prior exceedance + analyte history — the "this beach was recently dirty" memory.
+    cadence: per beach-sample
+    coverage: all ~830 statewide AB411 beaches; any station-day with a prior sample.
+    access: derived in research/bacteria/operational_benchmark.py (add_causal_features)
+    does: Carries most of the bacteria nowcast skill — the single strongest signal.
+    does_not: Anticipate a NEW event at a clean beach with no prior signal (e.g. a fresh spill); it is memory, so it lags regime breaks.
+    why: Fecal exceedance is strongly autocorrelated at a site (chronic sources, slow-changing sanitary infrastructure).
+    predictive_value:
+      bacteria_exceedance:
+        status: PRIMARY
+        metric: "dominant signal; station_memory baseline AP 0.28 on EXCLUDE_SAN_DIEGO"
+        evidence: research/bacteria/operational_benchmark.py
+
+  - name: rainfall
+    modality: meteorological
+    captures: County-mapped ASOS daily precipitation + first-flush (rain after a dry spell).
+    cadence: daily
+    coverage: statewide coastal-county ASOS airports, 2000-2026.
+    access: Iowa Mesonet ASOS; cached bacteria_results/rainfall/
+    does: Lift bacteria via first-flush — storm runoff mobilizes fecal load. The one external driver that clears the gate.
+    does_not: Help in the dry season or for chronic non-storm exceedances; it is coarse (county-level, not per-beach).
+    why: Storm runoff is a genuine causal pathway for fecal indicator bacteria; first-flush concentrates it after dry spells.
+    revisit_when: per-beach nearest-gauge rainfall (vs county-mapping) could earn more — retest if finer rain is added.
+    predictive_value:
+      bacteria_exceedance:
+        status: KEEP
+        metric: "ΔAP +0.010 (pooled A/B); first-flush mechanism"
+        evidence: research/bacteria/operational_benchmark.py
+
+  - name: neighbour_state
+    modality: derived
+    captures: Within-county / statewide recent exceedance context (cty_prev7, sw_prev7).
+    cadence: derived, ~weekly
+    coverage: statewide; any beach with neighbours reporting in the prior week.
+    access: derived in research/bacteria/ (signal_lab.py L2 candidate, spatial_autocorr)
+    does: Add spatial context — a dirty neighbourhood predicts a dirty beach. Passes the gate as an L2 signal.
+    does_not: Help isolated beaches with no reporting neighbours; it is a regional, not local, signal.
+    why: Nearby beaches share drivers (one storm or spill raises a whole stretch of coast at once).
+    revisit_when: a distance-weighted neighbour graph could beat flat county-pooling.
+    predictive_value:
+      bacteria_exceedance:
+        status: KEEP
+        metric: "L2 spatial signal; passes ΔAP + LOBO gate"
+        evidence: research/bacteria/signal_lab.py
+
+  - name: river_discharge
+    modality: hydrological
+    captures: Nearest USGS gauge first-flush river-discharge features.
+    cadence: daily
+    coverage: beaches within ~30km of a data-bearing USGS gauge.
+    access: USGS; cached bacteria_results/discharge/
+    does: Little — physically plausible (river plumes carry load) but it does not clear the lift bar.
+    does_not: Add anything over rainfall; gauge coverage is sparse.
+    why: Discharge is downstream of rain that is already in the model → redundant.
+    revisit_when: could matter for specific river-mouth beaches in a stratified (not pooled) model.
+    predictive_value:
+      bacteria_exceedance:
+        status: WASH
+        metric: "marginal; does not clear the lift bar (honest negative/mixed)"
+        evidence: research/bacteria/operational_benchmark.py
+
+  - name: cdip_waves
+    modality: oceanographic
+    captures: Nearest CDIP/NDBC buoy wave height / period / direction (Hs, Tp, Dm).
+    cadence: hourly -> daily
+    coverage: beaches near a CDIP buoy; ~39% of statewide station-days.
+    access: CDIP; cached bacteria_results/cdip_waves/
+    does: Essentially nothing for bacteria.
+    does_not: Provide transferable lift; net-negative pooled; ~39% coverage.
+    why: Wave energy is not a primary fecal-bacteria driver — orthogonal to runoff.
+    revisit_when: could matter for sediment-resuspension at specific surf-zone beaches; UNTESTED for DA.
+    predictive_value:
+      bacteria_exceedance:
+        status: WASH
+        metric: "pooled ΔAP -0.008; noise-band on Monterey (4th driver-null)"
+        evidence: reports/operational_benchmark/wave_tide_ablation.md
+
+  - name: tide_water_level
+    modality: oceanographic
+    captures: NOAA CO-OPS daily-mean water level (a storm-surge proxy) at nearest gauge.
+    cadence: daily
+    coverage: all beaches mapped to nearest CO-OPS gauge (100%, but distant for some).
+    access: NOAA CO-OPS; cached bacteria_results/tide_stages/
+    does: Appear to help pooled — but that gain is a San-Diego artifact, not real.
+    does_not: Lift transferably — ΔAP sign-flips across strata (+0.044 pooled/SD but -0.010 Monterey).
+    why: Daily-MEAN level is mostly astronomical+seasonal (≈ calendar, already modeled) plus a weak surge term that ≈ rain (redundant).
+    revisit_when: the de-tided SURGE residual (not raw level) might carry real storm signal — retest as residual; and test for DA (surge↔upwelling).
+    predictive_value:
+      bacteria_exceedance:
+        status: WASH
+        metric: "ΔAP sign-flips across strata (+0.044 pooled/SD, -0.010 Monterey) = artifact"
+        evidence: reports/operational_benchmark/wave_tide_ablation.md
+      domoic_acid:
+        status: UNTESTED
+        metric: "not gated for DA; plausible (surge ~ upwelling/storm coupling)"
+        evidence: null
+
+  - name: news_event_gdelt
+    modality: event
+    captures: GDELT news/event mentions (spill / sewage / closure language).
+    cadence: intermittent
+    coverage: county-level, sparse; GDELT API currently IP-blocked.
+    access: GDELT (blocked); see news-modality work.
+    does: Nothing additive — its only value is an operational human digest.
+    does_not: Improve the model; a powered A/B slightly HURT it.
+    why: News of a spill lags or co-occurs with the rain signal already in the model → redundant.
+    revisit_when: a STRUCTURED spill-report feed (SSO / CIWQS), not news, could be a real leading indicator — that is a different signal worth fetching.
+    predictive_value:
+      bacteria_exceedance:
+        status: WASH
+        metric: "redundant with rainfall; powered A/B hurt slightly. Operational digest only."
+        evidence: research/bacteria/operational_benchmark.py
+
+  - name: domoic_acid_pda
+    modality: biological
+    captures: CalHABMAP particulate domoic acid (pDA, ng/mL) — the marine biotoxin label itself.
+    cadence: weekly
+    coverage: 17 CalHABMAP piers, 2005-2026 (NOT statewide — ~813/830 beaches have none).
+    access: SCCOOS ERDDAP; cached data/external_curated/habmap_cdph/; ops/data_fetch adapters/habmap.py
+    does: Drive the DA forecast (AP 0.232, AUC 0.831; beats C-HARM 8/8 piers). Richest in Monterey Bay (Monterey 17.8% / Santa Cruz 7.6% event rate).
+    does_not: Inform the bacteria (fecal) target — a different hazard; coverage-limited; weekly cadence caps lead at ~1 week.
+    why: DA is an ocean-upwelling biotoxin, mechanistically unrelated to land-driven fecal contamination — and seasonally OFFSET (DA = dry upwelling season; bacteria = wet winter).
+    revisit_when: a bacteria test is only meaningful on the ~8 co-located pier beaches, as an INTERACTION — gate it there, not statewide.
+    predictive_value:
+      domoic_acid:
+        status: PRIMARY
+        metric: "forecast AP 0.232, ROC-AUC 0.831 (time-holdout); beats C-HARM 8/8 piers"
+        evidence: research/hab/da_forecast.py
+      bacteria_exceedance:
+        status: UNTESTED
+        metric: "COVERAGE-LIMITED: 17 piers can't inform 830 beaches. Test only on co-located sites."
+        evidence: null
+
+  - name: pseudo_nitzschia
+    modality: biological
+    captures: Pseudo-nitzschia seriata + delicatissima cell counts (cells/L) — the DA-producing diatom.
+    cadence: weekly
+    coverage: 17 CalHABMAP piers, 2005-2026.
+    access: SCCOOS ERDDAP; cached data/external_curated/habmap_cdph/
+    does: Improve the DA forecast — the precursor bloom precedes the toxin (best-AP feature group).
+    does_not: Perfectly predict toxin — not all Pseudo-nitzschia is toxic; pier-only coverage.
+    why: The toxin is produced BY this diatom, so a rising cell count is a leading precursor.
+    revisit_when: species/condition-resolved counts (toxic vs non-toxic strains) could sharpen it.
+    predictive_value:
+      domoic_acid:
+        status: KEEP
+        metric: "best-AP DA feature group (DA+precursor 0.232 vs DA-history 0.218)"
+        evidence: research/hab/da_forecast.py
+
+  - name: hab_physical_nutrient_drivers
+    modality: oceanographic
+    captures: In-situ temperature / chlorophyll / nitrate / phosphate / silicate at the piers.
+    cadence: weekly
+    coverage: 17 CalHABMAP piers, weekly.
+    access: SCCOOS ERDDAP; cached data/external_curated/habmap_cdph/
+    does: Nothing useful — adding them HURTS the DA model.
+    does_not: Provide lift in additive form (AP 0.169 with drivers vs 0.218 without).
+    why: Same pattern as the bacteria driver-nulls — the bloom + precursor + season already capture the regime, so raw physical/nutrient drivers add only noise (5th driver-null).
+    revisit_when: regime-aware use (upwelling vs stratification) or the Si:N ratio inside a regime-split model might rescue some; the raw additive form is rejected.
+    predictive_value:
+      domoic_acid:
+        status: REJECT
+        metric: "HURT the DA model (AP 0.169 with drivers vs 0.218 without) = 5th driver-null"
+        evidence: research/hab/da_forecast.py
+
+  - name: upwelling_index_beuti
+    modality: oceanographic
+    captures: NOAA BEUTI / CUTI biologically-effective upwelling transport (nutrient-flux proxy).
+    cadence: daily by latitude band (32N-42N)
+    coverage: "full CA coast, daily 1988-present (308,836 rows). FETCHED: source upwelling_indices."
+    access: "https://mjacox.com/wp-content/uploads/{CUTI,BEUTI}_daily.csv -> data/external_curated/upwelling_indices/ (the erdCUTIdaily ERDDAP dataset is dead-404)."
+    does: "TESTED + REJECTED for DA. Windowed BEUTI/CUTI at the pier latitude band, swept over 7/14/21/28/45-day lead windows, all FAIL the gate (REJECT or WASH)."
+    does_not: "Improve the DA forecast - every window regresses or washes; the 28d window gained on the temporal holdout (+0.0192) but FAILED leave-one-station-out (-0.0087) = sparse-panel overfit, not signal."
+    why: "Mechanistically the root cause (upwelling -> nitrate -> Pseudo-nitzschia -> DA), but on the 52-event panel it adds noise the precursor-dominated model cannot use - the DA driver-null extends even to the textbook-correct driver. The dual temporal+LOSO gate caught the false 28d positive."
+    revisit_when: "DA panel grows materially (more events) or a non-linear/threshold upwelling formulation is tried; also testable for bacteria_exceedance (untested)."
+    predictive_value:
+      domoic_acid:
+        status: REJECT
+        metric: "swept 7-45d lead windows: all REJECT/WASH; 28d temporal +0.0192 but LOSO -0.0087 (overfit)"
+        evidence: reports/hab/da_upwelling_gate/verdict.json
+      bacteria_exceedance:
+        status: UNTESTED
+        metric: "coastal physical driver; not yet gated for bacteria"
+        evidence: null
+
+  # --- New ingested sources gated as BACTERIA signals (claude-fetch-B, 2026-06-11);
+  # leakage-safe causal join + signal_lab gate. See reports/bacteria/new_source_signal_gate/.
+  - name: open_meteo_air_temp
+    modality: meteorological
+    captures: "ERA5 reanalysis 2m air temperature at the nearest CA-coastal grid cell (open_meteo_archive), as-of the sample."
+    cadence: per beach-sample (nearest-location as-of, reveal-lagged)
+    coverage: statewide CA beaches via nearest source location.
+    access: research/bacteria/new_source_signal_gate.py (causal join over data/external_curated/)
+    does: "Clears the bacteria gate - temporal dAP +0.0131 AND survives leave-one-beach-out (+0.0050) over FEATS+rain."
+    does_not: "Add much beyond a seasonal proxy; lift is modest (~+0.013 AP)."
+    why: "Warmer antecedent air temp tracks bacterial survival/regrowth plus a finer seasonal signal than calendar features; dense ERA5 coverage makes the join clean."
+    predictive_value:
+      bacteria_exceedance:
+        status: KEEP
+        metric: "temporal dAP +0.0131, LOBO +0.0050 (SD-excluded, FEATS+rain base)"
+        evidence: reports/bacteria/new_source_signal_gate/verdicts.json
+
+  - name: ghcnd_precip
+    modality: meteorological
+    captures: "GHCN-Daily statewide-mean station precipitation (ghcnd), as-of the sample."
+    cadence: per beach-sample (nearest-location as-of, reveal-lagged)
+    coverage: statewide CA beaches via nearest source location.
+    access: research/bacteria/new_source_signal_gate.py (causal join over data/external_curated/)
+    does: "Borderline wash - temporal dAP +0.0049 (under the 0.005 bar) though LOBO +0.0062."
+    does_not: "Beat the existing Open-Meteo rainfall driver it duplicates."
+    why: "Precip is already the one KEEP driver; a second statewide-mean precip is near-redundant."
+    predictive_value:
+      bacteria_exceedance:
+        status: WASH
+        metric: "temporal dAP +0.0049 < 0.005 (redundant with rainfall)"
+        evidence: reports/bacteria/new_source_signal_gate/verdicts.json
+
+  - name: usgs_turbidity
+    modality: hydrological
+    captures: "USGS NWIS daily turbidity at the nearest CA site (usgs_dv_statewide), as-of the sample."
+    cadence: per beach-sample (nearest-location as-of, reveal-lagged)
+    coverage: statewide CA beaches via nearest source location.
+    access: research/bacteria/new_source_signal_gate.py (causal join over data/external_curated/)
+    does: "Regresses the bacteria target - temporal dAP -0.0053 (LOBO +0.0076 sign-flips)."
+    does_not: "Help statewide - turbidity sites are sparse/inland relative to beaches."
+    why: "A buggy earlier join false-KEPT it (+0.0071); the corrected leakage-safe join shows it does not help."
+    predictive_value:
+      bacteria_exceedance:
+        status: REJECT
+        metric: "temporal dAP -0.0053 (sparse inland coverage; earlier KEEP was a join artifact)"
+        evidence: reports/bacteria/new_source_signal_gate/verdicts.json
+
+  - name: usgs_water_temp
+    modality: hydrological
+    captures: "USGS NWIS daily water temperature at the nearest CA site (usgs_dv_statewide), as-of the sample."
+    cadence: per beach-sample (nearest-location as-of, reveal-lagged)
+    coverage: statewide CA beaches via nearest source location.
+    access: research/bacteria/new_source_signal_gate.py (causal join over data/external_curated/)
+    does: "Wash for bacteria - temporal dAP -0.0007."
+    does_not: "Carry independent signal beyond SST/air-temp already tested."
+    why: "River water temp at sparse inland gauges is a weak, poorly-located proxy for beach conditions."
+    predictive_value:
+      bacteria_exceedance:
+        status: WASH
+        metric: "temporal dAP -0.0007 (noise)"
+        evidence: reports/bacteria/new_source_signal_gate/verdicts.json
+
+  - name: cdip_sst_buoy
+    modality: oceanographic
+    captures: "In-situ sea-surface temperature at the nearest CDIP buoy (cdip_sst_network), as-of the sample."
+    cadence: per beach-sample (nearest-location as-of, reveal-lagged)
+    coverage: statewide CA beaches via nearest source location.
+    access: research/bacteria/new_source_signal_gate.py (causal join over data/external_curated/)
+    does: "Pure wash - temporal dAP 0.0000."
+    does_not: "Add anything over the SST signal already covered (MUR ocean driver)."
+    why: "SST is a smooth seasonal field already proxied by calendar + ocean features."
+    predictive_value:
+      bacteria_exceedance:
+        status: WASH
+        metric: "temporal dAP 0.0000"
+        evidence: reports/bacteria/new_source_signal_gate/verdicts.json
+
+  - name: cdip_wave_network
+    modality: oceanographic
+    captures: "Significant wave height at the nearest CDIP network buoy (cdip_wave_network), as-of the sample."
+    cadence: per beach-sample (nearest-location as-of, reveal-lagged)
+    coverage: statewide CA beaches via nearest source location.
+    access: research/bacteria/new_source_signal_gate.py (causal join over data/external_curated/)
+    does: "Pure wash - temporal dAP 0.0000; confirms the wave driver-null at network scale."
+    does_not: "Change the standing wave/tide driver-null for bacteria."
+    why: "Waves do not drive fecal-indicator exceedance here; the single-buoy wrapper washed and the network does too."
+    predictive_value:
+      bacteria_exceedance:
+        status: WASH
+        metric: "temporal dAP 0.0000 (confirms wave driver-null)"
+        evidence: reports/bacteria/new_source_signal_gate/verdicts.json
+
+  - name: ndbc_buoy_wind
+    modality: meteorological
+    captures: "Statewide-mean NDBC continuous buoy wind speed (ndbc_cwind), as-of the sample."
+    cadence: per beach-sample (nearest-location as-of, reveal-lagged)
+    coverage: statewide CA beaches via nearest source location.
+    access: research/bacteria/new_source_signal_gate.py (causal join over data/external_curated/)
+    does: "Wash for bacteria - temporal dAP +0.0035 (LOBO +0.0062, temporal under the bar)."
+    does_not: "Clear the gate as a mixing/upwelling proxy at statewide-mean resolution."
+    why: "A statewide-mean wind (no per-buoy geo in cwind) is too coarse to move the target."
+    predictive_value:
+      bacteria_exceedance:
+        status: WASH
+        metric: "temporal dAP +0.0035 < 0.005 (coarse statewide-mean)"
+        evidence: reports/bacteria/new_source_signal_gate/verdicts.json
+
+  - name: ncei_isd_air_temp
+    modality: meteorological
+    captures: "Observed hourly air temperature at the nearest NCEI ISD station (ncei_isd_hourly), as-of the sample."
+    cadence: per beach-sample (nearest-location as-of, reveal-lagged)
+    coverage: statewide CA beaches via nearest source location.
+    access: research/bacteria/new_source_signal_gate.py (causal join over data/external_curated/)
+    does: "Strongly regresses - temporal dAP -0.0489 (LOBO -0.0271)."
+    does_not: "Help - sparse station coverage makes the nearest-station join noisy."
+    why: "Same variable as the KEPT open_meteo_air_temp but from sparse stations; the noisy join adds harmful variance. Coverage/quality, not the variable, decides."
+    predictive_value:
+      bacteria_exceedance:
+        status: REJECT
+        metric: "temporal dAP -0.0489 (sparse-station noise; cf. dense ERA5 KEEP)"
+        evidence: reports/bacteria/new_source_signal_gate/verdicts.json
+
+  - name: nasa_power_air_temp
+    modality: meteorological
+    captures: "NASA POWER daily 2m air temperature at the nearest CA grid cell (nasa_power_daily), as-of the sample."
+    cadence: per beach-sample (nearest-location as-of, reveal-lagged)
+    coverage: statewide CA beaches via nearest source location.
+    access: research/bacteria/new_source_signal_gate.py (causal join over data/external_curated/)
+    does: "Regresses - temporal dAP -0.0193 (LOBO -0.0107)."
+    does_not: "Beat the dense ERA5 air-temp that did KEEP."
+    why: "Coarser/daily reanalysis air temp adds noise where finer ERA5 hourly helped."
+    predictive_value:
+      bacteria_exceedance:
+        status: REJECT
+        metric: "temporal dAP -0.0193 (coarser than the ERA5 KEEP)"
+        evidence: reports/bacteria/new_source_signal_gate/verdicts.json
+
+  - name: gridmet_precip
+    modality: meteorological
+    captures: "gridMET 4km daily precipitation at the nearest CA grid cell (gridmet_daily), as-of the sample."
+    cadence: per beach-sample (nearest-location as-of, reveal-lagged)
+    coverage: statewide CA beaches via nearest source location.
+    access: research/bacteria/new_source_signal_gate.py (causal join over data/external_curated/)
+    does: "Regresses - temporal dAP -0.0163 (LOBO -0.0024)."
+    does_not: "Beat the Open-Meteo rainfall driver it duplicates."
+    why: "A second gridded precip is redundant with the established rainfall driver and adds noise."
+    predictive_value:
+      bacteria_exceedance:
+        status: REJECT
+        metric: "temporal dAP -0.0163 (redundant with rainfall)"
+        evidence: reports/bacteria/new_source_signal_gate/verdicts.json
+

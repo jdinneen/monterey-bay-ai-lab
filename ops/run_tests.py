@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Run the local MBARI pipeline tests.
+"""Run the local Monterey Bay AI Lab pipeline tests.
 
 This is the stable test entrypoint for release/promotion work. It uses pytest
 when available so new tests can stay idiomatic, and returns a clear install hint
@@ -15,8 +15,11 @@ from pathlib import Path
 
 
 DEFAULT_TESTS = [
-    "tests/test_mbari_train.py",
-    "tests/test_mbari_neural_forecast.py",
+    "tests/test_model_registry.py",
+    "tests/test_model_suite.py",
+    "tests/test_confirm_model_suite.py",
+    "tests/test_mbal_train.py",
+    "tests/test_mbal_neural_forecast.py",
     "tests/test_release_gate.py",
     "tests/test_promotion_matrix.py",
     "tests/test_split_contracts.py",
@@ -28,9 +31,6 @@ DEFAULT_TESTS = [
     "tests/test_generate_daily_learnings.py",
     "tests/test_autonomous_rate_limit_fetcher.py",
     "tests/test_repair_driver_manifest.py",
-    "tests/test_fetch_news_events.py",
-    "tests/test_curate_news_event_evidence.py",
-    "tests/test_build_news_event_features.py",
     "tests/test_lakehouse_metrics.py",
     "tests/test_agent_lock.py",
     "tests/test_seasonal_naive.py",
@@ -41,11 +41,17 @@ DEFAULT_TESTS = [
     "tests/test_foundation_rerun_agent.py",
     "tests/test_promotion_critic_agent.py",
     "tests/test_report_consistency_agent.py",
+    "tests/test_moe_integration.py",
+    "tests/test_agent_brain.py",
+    "tests/test_command_center.py",
+    "tests/test_leaderboard_best_naive.py",
+    "tests/test_champion_reproducibility_gate.py",
+    "tests/test_driver_cell_demotion_gate.py",
 ]
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run MBARI local pipeline tests with pytest.")
+    parser = argparse.ArgumentParser(description="Run Monterey Bay AI Lab local pipeline tests with pytest.")
     parser.add_argument("tests", nargs="*", default=DEFAULT_TESTS, help="optional test paths")
     parser.add_argument("--quiet", action="store_true", help="pass -q to pytest")
     parser.add_argument(
@@ -70,8 +76,8 @@ def main() -> int:
     args = parse_args()
     if not pytest_available():
         print(
-            "pytest is not installed. Install the MBARI test dependency with:\n"
-            f"  {sys.executable} -m pip install -r ops/requirements-mbari-gpu.txt\n"
+            "pytest is not installed. Install the Monterey Bay AI Lab test dependency with:\n"
+            f"  {sys.executable} -m pip install -r ops/requirements-mbal-gpu.txt\n"
             "or just:\n"
             f"  {sys.executable} -m pip install pytest",
             file=sys.stderr,
@@ -91,3 +97,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

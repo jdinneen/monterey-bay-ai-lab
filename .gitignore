@@ -11,40 +11,145 @@ htmlcov/
 build/
 dist/
 .venv/
+.venvs/
 venv/
 env/
 
-# Editor / OS
-.DS_Store
-Thumbs.db
-.idea/
-.vscode/
+# Local agent/tool scratch
+.claude/
+.gemini/
+.qwen/
+commercial_arm/
+install.cmd
+_codex_smoke*/
+ai-agent-smoke/
+qwen-tool-test/
+smoke-test/
+playground/
+scripts/
+.sec-scan/
+computer-scan/
 
-# Data & model artifacts — shipped as a versioned data release, not in git (see DATA.md)
-*.parquet
-*.csv
-*.jsonl
-*.tfevents.*
+# Generated MBAL data and model artifacts
+mbal_history/
+mbal_pipeline/curated_history/
+mbal_analysis_results/
+mbal_data_profile/
+mbal_forecast_v2_results*/
+mbal_forecast_v2_smoke_results/
+mbal_forecast_v2_production/
+mbal_big_analysis_results/
+mbal_sota_results/
+mbal_experiments/runs/
+mbal_experiments/experiments.jsonl
+lakehouse/
 nn_cache/
 nn_results/
 lightning_logs/
-mbari_history/
-lakehouse/
+# bacteria_results/ is ignored EXCEPT the ~6MB frozen public inputs needed to reproduce the
+# nowcasting benchmark (see research/bacteria/reproduce/REPRODUCE.md + MANIFEST.sha256).
+bacteria_results/*
+!bacteria_results/statewide/
+bacteria_results/statewide/*
+!bacteria_results/statewide/statewide_beach_observations.parquet
+!bacteria_results/rainfall/
+bacteria_results/rainfall/*
+!bacteria_results/rainfall/rainfall_grid.parquet
+!bacteria_results/rainfall/station_grid_map.parquet
+!bacteria_results/discharge/
+bacteria_results/discharge/*
+!bacteria_results/discharge/discharge_gauge.parquet
+!bacteria_results/discharge/station_gauge_map.parquet
 reports/
-bacteria_results/
-viz_output/
-mbari_*_results/
-mbari_data_profile/
+cloud-viz/
 
-# Logs & run state
+# Logs and run outputs
 *.log
-*.pid
+*.pid*.pending
+*.tfevents.*
+
+# Scratch dirs / `git add .` footguns (see objective-review hygiene fixes)
+runs/
+tmp/
+/-p/
+*.parquet
+*.csv
+*.jsonl
+# Agent Brain memory is intentionally tracked; it is the shared anti-bloat memory.
+!docs/agent_brain/*.jsonl
+# Re-include the frozen reproduction inputs (override the blanket *.parquet rule above;
+# parent dirs are un-excluded near the bacteria_results/ rule). See research/bacteria/reproduce/.
+!bacteria_results/statewide/statewide_beach_observations.parquet
+!bacteria_results/rainfall/rainfall_grid.parquet
+!bacteria_results/rainfall/station_grid_map.parquet
+!bacteria_results/discharge/discharge_gauge.parquet
+!bacteria_results/discharge/station_gauge_map.parquet
+mbal-api-test-results.json
+mbal_dir_listing.html
+mbal_test_output.txt
+mbal_pipeline/reports/
+release_gate/reports/*.json
+
+# Large or unrelated local project assets
+3d-human-printing/
+alethia/
+
+# Databricks PRODUCT integration is forbidden: build like a lakehouse, not on the product.
+# See AGENTS.md. Do not track or restore these:
+databricks.yml
+resources/mbal_smoke.job.yml
+ops/jobs.databricks_smoke.json
+
+# Keep source/config/docs even when broad generated patterns exist
+!ops/jobs.smoke.json
+!ops/*.py
+!release_gate/*.py
+!tests/*.py
+!*.md
+!*.py
+!mbal_dataset_list.txt
+!ops/freeze-mbal-local.txt
+release_gate/reports/*.md
 
 # Multi-agent file-claim locks (runtime, never tracked)
 .agent_locks/
 
-# SOTA continual-learning training outputs — never track (multi-GB)
+# Precious-file overwrite snapshots — may contain global home-dir config content; never track
+ops/.precious_snapshots/
+
+# SOTA continual-learning training outputs (multi-GB checkpoints, run logs) — never track
 sota_continual_learning/output_production/
-sota_continual_learning/checkpoints/
-sota_continual_learning/*.log
+sota_continual_learning/training_log.txt
+sota_continual_learning/retrain_fixed.log
+sota_continual_learning/production_run.log
+
+# Model checkpoints and generated viz — never track (multi-hundred-MB blobs)
+outputs/
+**/checkpoints/
+viz_output/
 *.pt
+*.ckpt
+
+# Runtime agent/ops state — regenerated each run, never source of truth
+ops/gpu_idle_state.json
+ops/gpu_idle_queue.json
+ops/stack_registry.json
+ops/sentinel/state.json
+ops/sentinel/events.jsonl
+ops/telemetry/latest_system_telemetry.json
+ops/telemetry/20*/
+ops/stack_viz/logs/
+
+# SOTA continual-learning run outputs (idle/eval/metrics, diagnostics) — never track
+sota_continual_learning/output_idle_*/
+sota_continual_learning/*.stdout
+sota_continual_learning/monte_carlo_results.json
+sota_continual_learning/monte_carlo_results_summary.json
+
+# Scratch / temp files
+research/bacteria/reproduce/tmp_n
+
+# Generated visual artifacts — regenerable from their scripts (see ops/stack_viz, model_lab)
+ARCHITECTURE_VIZ.html
+ARCHITECTURE_VIZ.pdf
+research/model_lab/latent_tsf/*.png

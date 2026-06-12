@@ -9,7 +9,7 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from mbari_lakehouse import read_forecast_metrics  # noqa: E402
+from mbal_lakehouse import read_forecast_metrics  # noqa: E402
 
 
 def test_read_forecast_metrics_deduplicates_aggregate_and_partitions(tmp_path):

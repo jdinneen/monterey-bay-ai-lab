@@ -9,7 +9,7 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from mbari_forecast_v2 import build_hourly_matrix  # noqa: E402
+from mbal_forecast_v2 import build_hourly_matrix  # noqa: E402
 
 
 def test_build_hourly_matrix_preserves_m1_names_and_prefixes_other_stations():

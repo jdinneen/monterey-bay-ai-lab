@@ -9,7 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from release_gate.mbari_sr_manager_gate import SrManagerGateConfig, evaluate_sr_manager_gate  # noqa: E402
+from release_gate.mbal_sr_manager_gate import SrManagerGateConfig, evaluate_sr_manager_gate  # noqa: E402
 
 
 def _write_json(path: Path, payload: dict) -> None:
@@ -33,7 +33,7 @@ def _write_gate_artifacts(
         {"rows": 10, "status_counts": status_counts or {"promote": 1}},
     )
     if daily:
-        daily_path = root / "archive" / "reports" / "MBARI_AI_DAILY_LEARNINGS.md"
+        daily_path = root / "archive" / "reports" / "MBAL_AI_DAILY_LEARNINGS.md"
         daily_path.parent.mkdir(parents=True, exist_ok=True)
         daily_path.write_text("# Daily Learnings\n", encoding="utf-8")
 
@@ -110,7 +110,7 @@ def test_sr_manager_gate_fails_when_promotion_summary_is_missing(tmp_path):
         tmp_path / "release_gate" / "reports" / "release_gate_report.json",
         {"overall_status": "PASS", "checks": []},
     )
-    daily_path = tmp_path / "archive" / "reports" / "MBARI_AI_DAILY_LEARNINGS.md"
+    daily_path = tmp_path / "archive" / "reports" / "MBAL_AI_DAILY_LEARNINGS.md"
     daily_path.parent.mkdir(parents=True, exist_ok=True)
     daily_path.write_text("# Daily Learnings\n", encoding="utf-8")
 
@@ -127,7 +127,7 @@ def test_sr_manager_gate_cli_prints_json(tmp_path):
     proc = subprocess.run(
         [
             sys.executable,
-            str(ROOT / "release_gate" / "mbari_sr_manager_gate.py"),
+            str(ROOT / "release_gate" / "mbal_sr_manager_gate.py"),
             "--project-root",
             str(tmp_path),
         ],
@@ -149,7 +149,7 @@ def test_sr_manager_gate_cli_writes_output_json(tmp_path):
     proc = subprocess.run(
         [
             sys.executable,
-            str(ROOT / "release_gate" / "mbari_sr_manager_gate.py"),
+            str(ROOT / "release_gate" / "mbal_sr_manager_gate.py"),
             "--project-root",
             str(tmp_path),
             "--output",

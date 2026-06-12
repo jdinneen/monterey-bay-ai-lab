@@ -1,5 +1,5 @@
 # Local LLM and embedding analysis stack.
-# PyTorch CUDA wheels are installed separately by create_mbari_envs.ps1.
+# PyTorch CUDA wheels are installed separately by create_mbal_envs.ps1.
 numpy>=1.26
 pandas>=2.2
 pyarrow>=16.0

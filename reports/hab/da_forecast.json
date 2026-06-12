@@ -1,0 +1,143 @@
+{
+  "target": "next-visit pDA >= 0.5 ng/mL (=500 ng/L), ~1-week lead",
+  "splits": {
+    "train_end": 2018,
+    "valid_end": 2020,
+    "n_train": 3218,
+    "n_valid": 652,
+    "n_test": 1837,
+    "train_base_rate": 0.046
+  },
+  "test_timeheldout": {
+    "seasonal_naive": {
+      "n": 1837,
+      "events": 52,
+      "base_rate": 0.0283,
+      "ap": 0.0369,
+      "roc_auc": 0.6072,
+      "ap_lift_vs_base": 0.8
+    },
+    "persistence": {
+      "n": 1837,
+      "events": 52,
+      "base_rate": 0.0283,
+      "ap": 0.1383,
+      "roc_auc": 0.6636,
+      "ap_lift_vs_base": 3.01
+    },
+    "station_memory": {
+      "n": 1837,
+      "events": 52,
+      "base_rate": 0.0283,
+      "ap": 0.0331,
+      "roc_auc": 0.5502,
+      "ap_lift_vs_base": 0.72
+    },
+    "model_DA_history": {
+      "n": 1837,
+      "events": 52,
+      "base_rate": 0.0283,
+      "ap": 0.2179,
+      "roc_auc": 0.8661,
+      "ap_lift_vs_base": 4.74
+    },
+    "model_DA+precursor": {
+      "n": 1837,
+      "events": 52,
+      "base_rate": 0.0283,
+      "ap": 0.2322,
+      "roc_auc": 0.8314,
+      "ap_lift_vs_base": 5.05
+    },
+    "model_DA+precursor+drivers": {
+      "n": 1837,
+      "events": 52,
+      "base_rate": 0.0283,
+      "ap": 0.1694,
+      "roc_auc": 0.8481,
+      "ap_lift_vs_base": 3.68
+    },
+    "model_hgbt": {
+      "n": 1837,
+      "events": 52,
+      "base_rate": 0.0283,
+      "ap": 0.2322,
+      "roc_auc": 0.8314,
+      "ap_lift_vs_base": 5.05
+    }
+  },
+  "headline": {
+    "model_ap": 0.2322,
+    "best_baseline_ap": 0.1383,
+    "model_beats_baselines": true,
+    "model_roc_auc": 0.8314,
+    "loso_stations": 8,
+    "loso_model_beats_seasonal": "8/8"
+  },
+  "leave_one_station_out": {
+    "HABs-CalPolyPier": {
+      "model_ap": 0.1237,
+      "seasonal_ap": 0.0366,
+      "roc_auc": 0.8763,
+      "events": 25,
+      "n": 849,
+      "model_beats_seasonal": true
+    },
+    "HABs-MontereyWharf": {
+      "model_ap": 0.5964,
+      "seasonal_ap": 0.2437,
+      "roc_auc": 0.8787,
+      "events": 49,
+      "n": 275,
+      "model_beats_seasonal": true
+    },
+    "HABs-NewportBeachPier": {
+      "model_ap": 0.1375,
+      "seasonal_ap": 0.0362,
+      "roc_auc": 0.764,
+      "events": 12,
+      "n": 868,
+      "model_beats_seasonal": true
+    },
+    "HABs-SantaCruzWharf": {
+      "model_ap": 0.1573,
+      "seasonal_ap": 0.1278,
+      "roc_auc": 0.7667,
+      "events": 53,
+      "n": 713,
+      "model_beats_seasonal": true
+    },
+    "HABs-SantaMonicaPier": {
+      "model_ap": 0.3479,
+      "seasonal_ap": 0.0324,
+      "roc_auc": 0.8776,
+      "events": 13,
+      "n": 899,
+      "model_beats_seasonal": true
+    },
+    "HABs-ScrippsPier": {
+      "model_ap": 0.118,
+      "seasonal_ap": 0.0257,
+      "roc_auc": 0.7897,
+      "events": 10,
+      "n": 921,
+      "model_beats_seasonal": true
+    },
+    "HABs-StearnsWharf": {
+      "model_ap": 0.1813,
+      "seasonal_ap": 0.075,
+      "roc_auc": 0.8723,
+      "events": 29,
+      "n": 884,
+      "model_beats_seasonal": true
+    },
+    "HABs-TrinidadPier": {
+      "model_ap": 0.3166,
+      "seasonal_ap": 0.0969,
+      "roc_auc": 0.8629,
+      "events": 10,
+      "n": 107,
+      "model_beats_seasonal": true
+    }
+  }
+}

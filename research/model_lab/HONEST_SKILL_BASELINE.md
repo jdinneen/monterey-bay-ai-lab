@@ -1,4 +1,4 @@
-# MBARI — Honest Skill Baseline (persistence vs seasonal-naive)
+# Monterey Bay AI Lab — Honest Skill Baseline (persistence vs seasonal-naive)
 
 Skill vs PERSISTENCE alone is unfairly easy at diurnal horizons (+24/72/168h), where
 seasonal-naive (same-hour-yesterday) is a strong free baseline. The honest metric is skill

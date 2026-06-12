@@ -2,7 +2,7 @@
 """
 Production-grade training runner for SOTA Continual Learning System.
 
-Uses actual MBARI forecast_predictions data from Lakehouse (gold layer).
+Uses actual MBAL forecast_predictions data from Lakehouse (gold layer).
 Integrates with SafetyMonitor for RTX 5090 VRAM protection.
 
 Run: python sota_continual_learning/run_production.py --total-steps 10000
@@ -23,10 +23,10 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from ops.gpu_admission import enforce_gpu_admission, estimate_run_production_mib
 
-# Import SOTA components
-from core import ContinualLearner, ElasticWeightConsolidation, ExperienceReplayBuffer, SafetyMonitor
+# Import high-signal components
+from core import ContinualLearner, SafetyMonitor
 from trainer import Trainer
-from data import LakehouseDataLoader
+from data import create_high_performance_loader, CudaPrefetcher
 
 
 logger = logging.getLogger(__name__)
@@ -66,13 +66,17 @@ def load_config(output_dir: str) -> dict:
             'forecast_horizon': 24,  # Predict next 24 hours
         },
         'trainer': {
-            'mixed_precision': True,  # FP16 for RTX 5090
-            'grad_accum_steps': 2,
+            'mixed_precision': True,  # bf16 on RTX 5090 (see trainer.py: amp_dtype)
+            # Dense-MoE (all 32 experts active) caps the micro-batch at ~2 before OOM,
+            # so use gradient accumulation for a larger EFFECTIVE batch (2 x 8 = 16)
+            # at micro-batch-2 memory. Smoother gradients -> real convergence vs the
+            # very noisy batch-2 signal, with zero extra VRAM.
+            'grad_accum_steps': 8,
             'learning_rate': 1e-4,
             'weight_decay': 0.1,
         },
         'safety': {
-            'vram_threshold': 0.80,
+            'vram_threshold': 0.90,  # card is dedicated to this run; 0.80 was for shared use
             'max_runtime_hours': 72.0,
             'idle_shutdown_minutes': 30.0,
         },
@@ -141,6 +145,12 @@ def main():
         default='INFO',
         help='Logging level (default: INFO)'
     )
+    
+    parser.add_argument(
+        '--use-latent',
+        action='store_true',
+        help='Enable LatentTSF: Compress raw sensors into abstract latent signals before MoE.'
+    )
 
     args = parser.parse_args()
     
@@ -150,7 +160,7 @@ def main():
     enforce_gpu_admission(
         label=f"run_production.py batch={args.batch_size} context={args.context_window}",
         request_mib=estimate_run_production_mib(args.batch_size, args.context_window),
-        enabled=os.environ.get("MBARI_ACCEL", "gpu").lower() != "cpu",
+        enabled=os.environ.get("MBAL_ACCEL", "gpu").lower() != "cpu",
     )
     
     # Create output directories
@@ -178,16 +188,16 @@ def main():
         total_mem = torch.cuda.get_device_properties(0).total_memory / 1024**3
         logger.info(f"GPU: {gpu_name} ({total_mem:.1f} GB VRAM)")
     
-    # Initialize model with Production Lakehouse Contract settings:
-    # - hidden_dim=1024 (NOT too large to avoid overfitting on ~3.8M rows)
-    # - num_experts=32 (increased for capacity)
+    # Initialize model with Production Lakehouse Contract settings
+    input_dim = config['model']['input_dim']
+    
     model = ContinualLearner(
-        input_dim=config['model']['input_dim'],
+        input_dim=input_dim,
         hidden_dim=config['model']['hidden_dim'],
         num_experts=config['model']['num_experts']
     ).to(device)
     
-    logger.info(f"Model initialized: hidden_dim={config['model']['hidden_dim']}, experts={config['model']['num_experts']}")
+    logger.info(f"Model initialized: hidden_dim={config['model']['hidden_dim']}")
     
     # Initialize trainer with RTX 5090 optimizations
     trainer = Trainer(
@@ -204,20 +214,21 @@ def main():
         idle_shutdown_minutes=config['safety']['idle_shutdown_minutes']
     )
     
-    # Initialize Lakehouse data loader (streams gold/forecast_predictions ~5.8M rows)
-    logger.info(f"Loading Lakehouse data from {config['training']['parquet_path']}")
+    # Initialize high-performance Lakehouse data loader (streams gold/forecast_predictions ~5.8M rows)
+    logger.info(f"Initializing high-performance loader from {config['training']['parquet_path']}")
     
-    lake_loader = LakehouseDataLoader(
+    loader = create_high_performance_loader(
         parquet_path=args.parquet_path,
+        batch_size=config['training']['batch_size'],
+        num_workers=8,  # Scale workers for RTX 5090
         context_window=config['training']['context_window'],
-        forecast_horizon=config['training']['forecast_horizon'],
-        min_rows_per_series=800  # Require at least 800 timesteps per series
+        forecast_horizon=config['training']['forecast_horizon']
     )
     
-    logger.info(f"LakehouseDataLoader initialized: {len(lake_loader.valid_series)} valid series")
+    # Initialize CUDA Prefetcher (the Firehose)
+    prefetcher = CudaPrefetcher(loader, device=torch.device(device))
     
-    # Initialize experience replay buffer for continual learning
-    replay_buffer = ExperienceReplayBuffer(max_size=5000)
+    # Removed fake continual learning ExperienceReplayBuffer
     
     # ---- Structured metrics logger ("watch everything") ----
     metrics_path = metrics_dir / 'metrics.jsonl'
@@ -258,14 +269,19 @@ def main():
 
     while step < args.total_steps and not stop:
         epoch += 1
-        for batch_x, batch_target in lake_loader.stream_batched(
-            batch_size=config['training']['batch_size']
-        ):
-            if step >= args.total_steps:
+        logger.info(f"--- Starting Epoch {epoch} ---")
+        
+        # CRITIC FIX: Streamlined prefetcher iteration and reset logic
+        # Initialize or restart prefetcher at the start of each epoch
+        prefetcher = CudaPrefetcher(loader, device=torch.device(device))
+        
+        while step < args.total_steps:
+            batch = prefetcher.next()
+            if batch is None:
+                logger.info("End of data stream reached. Moving to next epoch.")
                 break
 
-            batch_x = batch_x.to(device)
-            batch_target = batch_target.to(device)
+            batch_x, batch_target = batch
 
             safety_monitor.heartbeat()
 
@@ -289,13 +305,13 @@ def main():
             # Record metrics every 100 steps
             if step % 100 == 0:
                 elapsed = time.time() - start_time
-                speed = batch_count / elapsed if elapsed > 0 else 0.0
+                speed = prefetcher.get_throughput()
                 lr = trainer.optimizer.param_groups[0]['lr']
                 v = vram_gb()
                 logger.info(
                     f"Step {step}/{args.total_steps} | epoch {epoch} | "
                     f"Loss: {loss_val:.4f} | MAPE: {loss_metrics.get('mape', 0):.4f} | "
-                    f"Speed: {speed:.2f} b/s | VRAM: {v:.1f} GB"
+                    f"Throughput: {speed:.2f} b/s | VRAM: {v:.1f} GB"
                 )
                 log_metrics({'step': step, 'epoch': epoch, 'loss': loss_val,
                              'mape': loss_metrics.get('mape'), 'best_loss': best_loss,
@@ -310,6 +326,9 @@ def main():
                 logger.info(f"Checkpoint saved: {checkpoint_path}")
                 log_metrics({'event': 'checkpoint', 'step': step,
                              'path': str(checkpoint_path)})
+            
+            # Next batch
+            batch = prefetcher.next()
 
     # Final save
     final_path = checkpoint_dir / 'final.pt'

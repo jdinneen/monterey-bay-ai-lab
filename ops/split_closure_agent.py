@@ -79,7 +79,7 @@ def build_report(project_root: Path, max_jobs: int, apply: bool, device: str, n_
         commands.append(
             [
                 sys.executable,
-                str(project_root / "release_gate" / "mbari_promotion_matrix.py"),
+                str(project_root / "release_gate" / "mbal_promotion_matrix.py"),
                 "--project-root",
                 str(project_root),
                 "--output-dir",
@@ -117,7 +117,7 @@ def write_outputs(report: dict[str, Any], output_dir: Path) -> dict[str, str]:
     md_path = output_dir / "SPLIT_CLOSURE_REPORT.md"
     json_path.write_text(json.dumps(report, indent=2, sort_keys=True, default=str), encoding="utf-8")
     lines = [
-        "# MBARI Split Closure Agent",
+        "# Monterey Bay AI Lab Split Closure Agent",
         "",
         f"- Overall status: **{report['overall_status']}**",
         f"- Apply mode: `{report['apply']}`",
@@ -158,3 +158,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

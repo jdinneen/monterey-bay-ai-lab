@@ -15,7 +15,7 @@ from ops.normalize_xgb_to_lakehouse import NormalizeConfig, build_metrics, norma
 
 
 def write_xgb_fixture(root: Path) -> None:
-    xgb_dir = root / "mbari_forecast_v2_results"
+    xgb_dir = root / "mbal_forecast_v2_results"
     xgb_dir.mkdir()
     pd.DataFrame(
         [

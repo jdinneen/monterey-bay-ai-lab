@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "invariants": [
+    {
+      "id": "project_identity_is_monterey_bay_ai_lab",
+      "severity": "binding",
+      "summary": "The project/lab identity is Monterey Bay AI Lab. Do not call the project MBAL, MBAL AI, MBAL AI Lab, or MBAL AI Forecasting; MBAL is allowed only for factual source-data/provider references, URLs/domains, legacy compatibility file/module names, or existing compatibility env vars.",
+      "source": "AGENTS.md"
+    },
+    {
+      "id": "human_approval_gate",
+      "severity": "binding",
+      "summary": "Agents may research and plan autonomously, but file modifications and state-changing commands require explicit user approval.",
+      "source": "AGENTS.md"
+    },
+    {
+      "id": "traffic_gate_for_heavy_tasks",
+      "severity": "binding",
+      "summary": "Heavy tasks, especially GPU jobs, must pass through ops/traffic_controller.py or ops/run_safe.py.",
+      "source": "AGENTS.md"
+    },
+    {
+      "id": "claim_before_edit",
+      "severity": "binding",
+      "summary": "Agents must claim files before editing and release claims afterward.",
+      "source": "AGENTS.md"
+    },
+    {
+      "id": "no_databricks_product_dependency",
+      "severity": "binding",
+      "summary": "Build like a lakehouse, but do not add Databricks product files, CLI dependencies, or DATABRICKS_* requirements.",
+      "source": "AGENTS.md"
+    },
+    {
+      "id": "metric_identity_includes_model_and_split",
+      "severity": "correctness",
+      "summary": "Lakehouse metric dedup keys must include model and split_id.",
+      "source": "AGENTS.md"
+    },
+    {
+      "id": "median_for_aggregate_skill",
+      "severity": "correctness",
+      "summary": "Aggregate skill must use the median; means are reference-only because outliers can dominate.",
+      "source": "AGENTS.md"
+    },
+    {
+      "id": "no_smoke_pooling",
+      "severity": "correctness",
+      "summary": "Smoke runs must not be pooled into production leaderboards.",
+      "source": "AGENTS.md"
+    },
+    {
+      "id": "best_naive_promotion_gate",
+      "severity": "correctness",
+      "summary": "Promotion requires beating the better of persistence and seasonal-naive where seasonal evidence is available.",
+      "source": "AGENTS.md"
+    },
+    {
+      "id": "observational_watchdogs_only",
+      "severity": "binding",
+      "summary": "Do not auto-rewrite model code when loss spikes; halt or alert so a human can inspect possible physical anomalies.",
+      "source": "docs/agent_brain/science_mission.md"
+    },
+    {
+      "id": "target_scaling_matches_evaluation_unscaling",
+      "severity": "correctness",
+      "summary": "Training target scaling must match evaluator un-scaling; avoid global-average training scaling when evaluation uses local context-window un-scaling.",
+      "source": "docs/agent_brain/science_mission.md"
+    },
+    {
+      "id": "clip_normalized_targets",
+      "severity": "correctness",
+      "summary": "Clip normalized targets, for example to [-20, 20], to prevent near-zero-variance sensor flatlines from exploding.",
+      "source": "docs/agent_brain/science_mission.md"
+    },
+    {
+      "id": "use_allocated_not_reserved_for_vram_shutdown",
+      "severity": "correctness",
+      "summary": "Safety monitors should use torch.cuda.memory_allocated(), not memory_reserved(), because the PyTorch caching allocator reserves memory aggressively.",
+      "source": "docs/agent_brain/science_mission.md"
+    }
+  ]
+}

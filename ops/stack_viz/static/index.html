@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Monterey Bay AI Lab Stack Watch</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Monterey Bay AI Lab</p>
+          <h1>Stack Watch</h1>
+        </div>
+        <div class="top-actions">
+          <div class="state-pill" id="admissionPill">loading</div>
+          <div class="clock" id="clock">--</div>
+        </div>
+      </header>
+
+      <section class="metrics" aria-label="Live metrics">
+        <article class="metric">
+          <div class="metric-head">
+          <span>Compute Now</span>
+            <strong id="gpuUtil">--</strong>
+          </div>
+          <div class="bar"><i id="gpuUtilBar"></i></div>
+          <p id="gpuName">--</p>
+        </article>
+        <article class="metric">
+          <div class="metric-head">
+            <span>VRAM</span>
+            <strong id="vramUsed">--</strong>
+          </div>
+          <div class="bar"><i id="vramBar"></i></div>
+          <p id="vramFree">--</p>
+        </article>
+        <article class="metric">
+          <div class="metric-head">
+            <span>Models</span>
+            <strong id="modelCount">--</strong>
+          </div>
+          <div class="bar"><i id="modelBar"></i></div>
+          <p id="modelCaption">--</p>
+        </article>
+        <article class="metric">
+          <div class="metric-head">
+            <span>Latest Step</span>
+            <strong id="stepCount">--</strong>
+          </div>
+          <div class="bar"><i id="stepBar"></i></div>
+          <p id="lossCaption">--</p>
+        </article>
+      </section>
+
+      <section class="workbench">
+        <section class="stack-panel" aria-label="Data stack">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Live Path</p>
+              <h2>Data Flow</h2>
+            </div>
+            <div class="pulse-key">
+              <span><i class="key-dot active"></i>active</span>
+              <span><i class="key-dot warn"></i>tight</span>
+              <span><i class="key-dot done"></i>ready</span>
+            </div>
+          </div>
+          <div class="stack-strip" id="stackStrip"></div>
+        </section>
+
+        <aside class="side-panel" aria-label="Running jobs">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Compute</p>
+              <h2>Running</h2>
+            </div>
+          </div>
+          <div class="job-list" id="jobList"></div>
+          <div class="queue-block">
+            <div class="panel-head compact">
+              <div>
+                <p class="eyebrow">Next Up</p>
+                <h2>Idle Queue</h2>
+              </div>
+            </div>
+            <div class="queue-list" id="queueList"></div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="lower-grid">
+        <section class="panel" aria-label="Events">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Signals</p>
+              <h2>Events</h2>
+            </div>
+          </div>
+          <div class="event-list" id="eventList"></div>
+        </section>
+        <section class="panel" aria-label="Artifacts">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Lakehouse</p>
+              <h2>Artifacts</h2>
+            </div>
+          </div>
+          <div class="artifact-list" id="artifactList"></div>
+        </section>
+      </section>
+    </main>
+    <!--STACK_STATE-->
+    <script src="/app.js"></script>
+  </body>
+</html>

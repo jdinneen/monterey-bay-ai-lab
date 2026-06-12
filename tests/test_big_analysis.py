@@ -9,7 +9,7 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from research.model_lab.mbari_big_analysis import _m1_m2_overlap  # noqa: E402
+from research.model_lab.mbal_big_analysis import _m1_m2_overlap  # noqa: E402
 
 
 def test_m1_m2_overlap_returns_schema_when_no_series_pass_threshold():

@@ -1,25 +1,19 @@
 # Security Policy
 
-## Reporting a vulnerability
+## Supported Versions
+Only the latest version of the Monterey Bay AI Lab is supported for security updates.
 
-Please report security issues **privately**, not via public issues/PRs.
+## Reporting a Vulnerability
+We take the security of our coastal intelligence platform seriously. If you find a vulnerability, please do NOT open a public issue. Instead:
+1.  Contact the maintainers directly.
+2.  Provide a detailed report and reproduction steps.
+3.  Allow us time to remediate before public disclosure.
 
-- Use GitHub's [private vulnerability reporting](https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability)
-  ("Report a vulnerability" on the Security tab), or
-- email the maintainers listed in `CODEOWNERS`.
+## Focus Areas
+- **Secret Prevention:** We rigorously scan for BigQuery keys and GCP service account JSONs.
+- **Dark Machine Protection:** Our local Forge is private-by-design; inbound vulnerabilities are our highest priority.
+- **Container Hygiene:** Docker builds must not include local credentials, raw private datasets, generated caches, or workstation-only artifacts.
+- **Open-Source Boundary:** Public issues and pull requests should avoid sensitive operational details, non-public data paths, and private cloud identifiers.
 
-We aim to acknowledge within a few business days and will coordinate a fix and disclosure
-timeline with you.
-
-## Scope
-
-This repository is research/forecasting code and curated public data. It contains **no
-credentials** by policy. If you find a committed secret, local absolute path, or other
-sensitive artifact, treat it as a vulnerability and report it privately so we can purge it.
-
-## For maintainers — pre-publish hygiene
-
-- CI runs a secret scan on every PR; do not merge on a finding.
-- Cloud access is environment-configured via `MBARI_*` variables — never hardcode a project
-  id, key, or token.
-- Generated reports and raw data caches are gitignored; never force-add them.
+---
+**Monterey Bay AI Lab — Protecting Coastal Intelligence.**

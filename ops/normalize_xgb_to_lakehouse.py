@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Normalize MBARI forecast-v2 XGBoost results into lakehouse contracts."""
+"""Normalize MBAL forecast-v2 XGBoost results into lakehouse contracts."""
 
 from __future__ import annotations
 
@@ -25,7 +25,7 @@ class NormalizeConfig:
 
     @property
     def xgb_results_dir(self) -> Path:
-        return self.project_root / "mbari_forecast_v2_results"
+        return self.project_root / "mbal_forecast_v2_results"
 
     @property
     def leaderboard_path(self) -> Path:
@@ -200,7 +200,7 @@ def build_manifest(config: NormalizeConfig, metrics: pd.DataFrame) -> dict[str, 
         "run_id": config.run_id,
         "model": "xgboost_forecast_v2",
         "split_id": DEFAULT_SPLIT_ID,
-        "source": "mbari_forecast_v2_results",
+        "source": "mbal_forecast_v2_results",
         "leaderboard_csv": str(config.leaderboard_path.relative_to(config.project_root)),
         "model_results_json": str(config.model_results_path.relative_to(config.project_root)),
         "metrics_rows": int(len(metrics)),
@@ -229,6 +229,17 @@ def write_outputs(config: NormalizeConfig, run_metrics: pd.DataFrame, manifest: 
         f.write("\n")
     run_metrics.to_parquet(config.run_metrics_path, index=False)
     aggregate.to_parquet(config.aggregate_metrics_path, index=False)
+    try:  # Phase-1 shadow dual-write — opt-in via MBAL_GOLD_SHADOW_DELTA=1, non-fatal
+        import sys as _sys
+        _root = str(Path(__file__).resolve().parents[1])
+        if _root not in _sys.path:
+            _sys.path.insert(0, _root)
+        from ops.migrate_gold_to_delta import shadow_dual_write
+        shadow_dual_write(
+            "forecast_metrics", aggregate, gold_dir=config.aggregate_metrics_path.parent.parent
+        )
+    except Exception:
+        pass
     return aggregate
 
 

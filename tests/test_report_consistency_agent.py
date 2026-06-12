@@ -29,7 +29,7 @@ def test_report_consistency_fails_stale_counts_and_overclaim(tmp_path):
     (reports / "release_gate_report.json").write_text(json.dumps({"overall_status": "PASS"}), encoding="utf-8")
     (reports / "sr_manager_gate_report.json").write_text(json.dumps({"overall_status": "PASS"}), encoding="utf-8")
     (tmp_path / "PRODUCTION_READINESS.md").write_text("Promotion matrix: 12 promote. wave drivers help.", encoding="utf-8")
-    (tmp_path / "MBARI_PRODUCTION_LAKEHOUSE_CONTRACTS.md").write_text("contracts", encoding="utf-8")
+    (tmp_path / "MBAL_PRODUCTION_LAKEHOUSE_CONTRACTS.md").write_text("contracts", encoding="utf-8")
     (tmp_path / "README.md").write_text("readme", encoding="utf-8")
 
     report = build_report(tmp_path)
