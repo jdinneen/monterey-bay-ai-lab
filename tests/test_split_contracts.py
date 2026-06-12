@@ -9,7 +9,7 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from mbari_split_contracts import build_split_contract, load_split_contract, write_split_contract  # noqa: E402
+from mbal_split_contracts import build_split_contract, load_split_contract, write_split_contract  # noqa: E402
 
 
 def test_split_contract_is_deterministic_and_writable(tmp_path):

@@ -1,0 +1,31 @@
+{
+  "_comment": "Bounded screening runs for observed-only NDBC 46042 wave drivers.",
+  "jobs": [
+    {
+      "label": "nhits_ablate_ndbc_wave",
+      "model": "nhits",
+      "outdir": "ablate_nhits_ndbc_wave",
+      "extra_args": [
+        "--drivers-parquet", "nn_cache/drivers_hourly.parquet",
+        "--drivers-manifest", "nn_cache/driver_ablation/ndbc_wave.json",
+        "--tail-weeks", "104",
+        "--max-steps", "500",
+        "--n-windows", "16"
+      ],
+      "profile": "safe"
+    },
+    {
+      "label": "tsmixerx_ablate_ndbc_wave",
+      "model": "tsmixerx",
+      "outdir": "ablate_tsmixerx_ndbc_wave",
+      "extra_args": [
+        "--drivers-parquet", "nn_cache/drivers_hourly.parquet",
+        "--drivers-manifest", "nn_cache/driver_ablation/ndbc_wave.json",
+        "--tail-weeks", "104",
+        "--max-steps", "500",
+        "--n-windows", "16"
+      ],
+      "profile": "safe"
+    }
+  ]
+}

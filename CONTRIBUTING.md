@@ -1,44 +1,35 @@
-# Contributing
+# Contributing to Monterey Bay AI Lab
 
-Thanks for helping improve the Monterey Bay AI Lab forecasting stack. The project favors
-**honest evaluation over headline numbers** — changes that touch modeling or promotion
-must keep the evidence gates green.
+We welcome contributions to the revolutionary coastal intelligence platform. To maintain our high standards for high-performance computing (HPC) and multivariate analysis, please follow these guidelines.
 
-## Workflow (trunk-based + PR)
+## 1. Our Engineering Standards
+- **AI is HPC:** We value iterative multivariate regression, A/B testing, and rigorous baseline benchmarking.
+- **Leakage Zero:** All predictive features must be strictly causal. No information from the future is allowed.
+- **Truth over Hype:** We favor the "Honest Baseline" over inflated metrics.
 
-1. Branch off `main` with a short-lived branch: `git switch -c feat/<short-name>`.
-2. Make focused changes. Keep one logical change per PR.
-3. Run the suite locally: `python ops/run_tests.py` (must pass).
-4. Open a PR. CI must be green and one review is required before merge.
-5. **Merges are squash-only** — your branch collapses to a single, revertable commit on a
-   linear `main`. Don't worry about messy intermediate commits; write a clear PR title (it
-   becomes the squash commit subject).
+## 2. Development Workflow
+1.  **Claim a File:** Before editing, use the cooperative lock:
+    `python ops/agent_lock.py claim <paths...> --agent <id> --task "<desc>"`
+2.  **Pre-commit:** Install the pre-commit hooks to ensure linting and formatting standards:
+    `pre-commit install`
+3.  **Install Locally:** Use an editable Python 3.12 environment:
+    `python -m pip install -e ".[test]"`
+4.  **Conventional Commits:** Use standard prefixes: `feat:`, `fix:`, `refactor:`, `docs:`, `test:`.
 
-`main` is protected: no direct pushes, required CI, required review, linear history.
+## 3. Testing
+All changes must pass the local test suite before promotion:
+`python .\ops\run_tests.py`
 
-## Developer Certificate of Origin (DCO)
+For open-source reproducibility, also verify the Docker path when dependency, packaging, or environment files change:
+`docker build -t monterey-bay-ai-lab:dev .`
+`docker run --rm monterey-bay-ai-lab:dev`
 
-We use the [DCO](https://developercertificate.org/) instead of a CLA. Every commit must be
-signed off, certifying you have the right to submit it under the project's license:
+## 4. Submitting Changes
+- Create a feature branch: `feature/your-innovation`
+- Ensure all CI gates pass (Ruff, Gitleaks, Unit Tests).
+- Review `docs/open_source_readiness.md` before public release.
+- Do not commit local `.env` files, credentials, raw private data, caches, or generated training outputs.
+- Submit a Pull Request.
 
-```
-git commit -s -m "your message"
-```
-
-This appends `Signed-off-by: Your Name <you@example.com>` (use your real name and a real
-email). CI checks for the sign-off; PRs without it can't merge.
-
-## Conventions
-
-- Python, std formatting; match the surrounding code's style and comment density.
-- New behavior needs a test under `tests/` and registration in `ops/run_tests.py`.
-- Never commit credentials, API keys, or local absolute paths. Configure cloud access via
-  the `MBARI_*` environment variables (see README). CI runs a secret scan.
-- Don't commit generated artifacts or large data (see `.gitignore` and `DATA.md`).
-- Promotion-affecting changes must keep `ops/evidence_gate_agent.py` passing: a model is
-  only promotable if it beats the **best-naive** baseline (better of persistence and
-  seasonal-naive). See `AGENTS.md`.
-
-## Reporting issues
-
-Use GitHub Issues for bugs/ideas. For anything security-sensitive, see `SECURITY.md`.
+---
+**Monterey Bay AI Lab — Building the Future of Coastal Intelligence.**

@@ -63,6 +63,13 @@ class PerformanceMonitor:
         metrics = self.metrics.get(name, [])
         return sum(metrics) / len(metrics) if metrics else 0.0
     
+    def reset(self) -> None:
+        """Clear all stored metrics and timings."""
+        self.metrics = {}
+        self.timings = {}
+        self.start_time = time.time()
+        logger.info("Performance monitor reset")
+    
     @property
     def total_time(self) -> float:
         return time.time() - self.start_time
@@ -358,13 +365,6 @@ class Trainer:
             
             for batch_idx, batch in enumerate(train_loader):
                 self.monitor.start_timer('data_loading')
-                
-                try:
-                    # Data loading timing (if loader supports it)
-                    pass
-                except:
-                    pass
-                
                 self.monitor.start_timer('forward_backward')
                 
                 # Training step
@@ -447,6 +447,10 @@ class Trainer:
         
         return total_loss / (num_samples + 1e-8)
     
+    def reset_metrics(self) -> None:
+        """Clear metrics history to prevent memory leaks in long simulations."""
+        self.monitor.reset()
+
     def save_checkpoint(self, path: Path) -> None:
         """Save model checkpoint."""
         state = {

@@ -14,23 +14,24 @@ redistribution or commercial use.
 | Tides / water level (CO-OPS) | NOAA CO-OPS | `tidesandcurrents.noaa.gov` | U.S. Gov public domain |
 | Upwelling indices | NOAA | public feeds | U.S. Gov public domain |
 | CA beach water-quality (BeachWatch) | CA SWRCB / CDPH | `waterqualitydata.us` / state records | CA public records |
+| CalHABMAP pier domoic acid (particulate DA) | CalHABMAP / SCCOOS | ERDDAP `erddap.sccoos.org` | public research data (shipped: `data/external_curated/habmap_cdph/habmap_cdph.parquet`, 304 KB) |
 
 ## How the pipeline reads data
 
 Code never hardcodes a path or cloud project. Configure via environment variables:
 
-- `MBARI_PROJECT_ROOT` — repo / working root
-- `MBARI_SOURCE_PARQUET` — curated source panel
-- `MBARI_CACHE_DIR` — feature/driver cache (`nn_cache`)
-- `MBARI_LAKEHOUSE_DIR` — lakehouse outputs (`lakehouse`)
-- `MBARI_GCP_PROJECT` — your own GCP project, if pulling from BigQuery
+- `MBAL_PROJECT_ROOT` — repo / working root
+- `MBAL_SOURCE_PARQUET` — curated source panel
+- `MBAL_CACHE_DIR` — feature/driver cache (`nn_cache`)
+- `MBAL_LAKEHOUSE_DIR` — lakehouse outputs (`lakehouse`)
+- `MBAL_GCP_PROJECT` — your own GCP project, if pulling from BigQuery
 
 ## Curated data + results release
 
 The curated panel, lakehouse gold tables, and model results are **not** committed to git
 (too large, and provider-licensed). They are distributed as a tagged **data release**
-(GitHub Release asset or a Zenodo DOI). Download it and point `MBARI_SOURCE_PARQUET` /
-`MBARI_LAKEHOUSE_DIR` at your local copy. See the repo's Releases page.
+(GitHub Release asset or a Zenodo DOI). Download it and point `MBAL_SOURCE_PARQUET` /
+`MBAL_LAKEHOUSE_DIR` at your local copy. See the repo's Releases page.
 
 To reproduce from scratch instead, use the fetchers under `research/` and the build steps
 in `README.md` against your own credentials/quota.

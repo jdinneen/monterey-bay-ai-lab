@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "project": "Monterey Bay AI Lab",
+  "identity_rule": "The lab/project/repository identity is Monterey Bay AI Lab. MBAL is a legacy code/namespace token only, never the project name or data provider. MBARI is the factual M1/M2 mooring data provider.",
+  "brain_status": "local_only_not_deployed",
+  "primary_contracts": [
+    "AGENTS.md",
+    "docs/agent_brain/science_mission.md",
+    "docs/VALUE_GATE.md",
+    "MBAL_PRODUCTION_LAKEHOUSE_CONTRACTS.md",
+    "PRODUCTION_READINESS.md"
+  ],
+  "current_baselines": {
+    "mooring_forecasts": [
+      "persistence",
+      "seasonal_naive_same_hour_yesterday",
+      "xgboost"
+    ],
+    "bacteria_nowcasting": [
+      "AB411",
+      "station_memory",
+      "xgboost"
+    ]
+  },
+  "project_boundaries": [
+    {
+      "name": "director_model_agents_are_execution_engines_and_scientific_critics",
+      "status": "guidance",
+      "source": "docs/agent_brain/science_mission.md"
+    },
+    {
+      "name": "monterey_bay_moat_latent_multimodal_signal_discovery",
+      "status": "guidance",
+      "source": "docs/agent_brain/science_mission.md"
+    },
+    {
+      "name": "portable_lakehouse_not_databricks_product",
+      "status": "binding",
+      "source": "AGENTS.md"
+    },
+    {
+      "name": "promotion_requires_best_naive_evidence",
+      "status": "binding",
+      "source": "AGENTS.md"
+    },
+    {
+      "name": "new_features_must_pass_value_gate",
+      "status": "binding",
+      "source": "docs/VALUE_GATE.md"
+    }
+  ],
+  "deployment_boundary": "Agent Brain files and scripts are built for local use only until explicitly wired into hooks, CI, or launchers."
+}

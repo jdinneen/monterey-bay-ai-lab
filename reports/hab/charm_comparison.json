@@ -1,0 +1,102 @@
+{
+  "charm_dataset": "wvcharmV3_0day (C-HARM v3.1 nowcast, P[particulate DA > 500 ng/L])",
+  "overlap_window": "2022-11-01..2026-06-08",
+  "n_common_rows": 1132,
+  "n_common_events": 45,
+  "our_model": {
+    "n": 1132,
+    "events": 45,
+    "ap": 0.271,
+    "roc_auc": 0.8393
+  },
+  "charm_nowcast": {
+    "n": 1132,
+    "events": 45,
+    "ap": 0.0265,
+    "roc_auc": 0.2966
+  },
+  "per_station": {
+    "CalPolyPier": {
+      "n": 174,
+      "events": 6,
+      "our_ap": 0.1494,
+      "charm_ap": 0.0334,
+      "our_auc": 0.8328,
+      "charm_auc": 0.4236,
+      "we_win_ap": true
+    },
+    "HumboldtSouthBay": {
+      "n": 39,
+      "events": 3,
+      "our_ap": 0.1346,
+      "charm_ap": 0.0789,
+      "our_auc": 0.4398,
+      "charm_auc": 0.3241,
+      "we_win_ap": true
+    },
+    "NewportBeachPier": {
+      "n": 151,
+      "events": 5,
+      "our_ap": 0.145,
+      "charm_ap": 0.0536,
+      "our_auc": 0.7397,
+      "charm_auc": 0.4164,
+      "we_win_ap": true
+    },
+    "SantaCruzWharf": {
+      "n": 171,
+      "events": 9,
+      "our_ap": 0.2109,
+      "charm_ap": 0.0478,
+      "our_auc": 0.7905,
+      "charm_auc": 0.3841,
+      "we_win_ap": true
+    },
+    "SantaMonicaPier": {
+      "n": 171,
+      "events": 5,
+      "our_ap": 0.7143,
+      "charm_ap": 0.0194,
+      "our_auc": 0.994,
+      "charm_auc": 0.1349,
+      "we_win_ap": true
+    },
+    "ScrippsPier": {
+      "n": 172,
+      "events": 7,
+      "our_ap": 0.2778,
+      "charm_ap": 0.0289,
+      "our_auc": 0.8654,
+      "charm_auc": 0.2416,
+      "we_win_ap": true
+    },
+    "StearnsWharf": {
+      "n": 174,
+      "events": 4,
+      "our_ap": 0.3129,
+      "charm_ap": 0.0198,
+      "our_auc": 0.8434,
+      "charm_auc": 0.2368,
+      "we_win_ap": true
+    },
+    "TrinidadPier": {
+      "n": 46,
+      "events": 6,
+      "our_ap": 0.6263,
+      "charm_ap": 0.0902,
+      "our_auc": 0.9458,
+      "charm_auc": 0.1708,
+      "we_win_ap": true
+    }
+  },
+  "headline": {
+    "stations_compared": 8,
+    "we_beat_charm_ap": "8/8",
+    "our_ap": 0.271,
+    "charm_ap": 0.0265,
+    "our_auc": 0.8393,
+    "charm_auc": 0.2966,
+    "charm_mean_prob": 0.686,
+    "actual_event_rate": 0.04
+  }
+}

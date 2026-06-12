@@ -8,7 +8,7 @@ Pipeline:
      measure its skill on the held-out LATE cutoffs (test) vs the best naive baseline.
      No hindsight. Report selector vs always-persistence vs oracle.
 
-Scoring matches mbari_neural_forecast.evaluate(): observed target points only;
+Scoring matches mbal_neural_forecast.evaluate(): observed target points only;
 persistence = obs at origin; seasonal-naive = obs at ds-24h; all on a common subset.
 """
 import os, glob, sys, time
@@ -19,7 +19,7 @@ os.environ.setdefault("CUDA_VISIBLE_DEVICES", "")  # force CPU: avoid GPU conten
 os.environ.setdefault("TF_ENABLE_ONEDNN_OPTS", "0")
 
 # Lives at <root>/research/model_lab/; resolve project root 3 levels up (or env override).
-ROOT = os.environ.get("MBARI_PROJECT_ROOT") or os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ROOT = os.environ.get("MBAL_PROJECT_ROOT") or os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 NNC, NNR = os.path.join(ROOT, "nn_cache"), os.path.join(ROOT, "nn_results")
 HORIZONS = [1, 6, 24, 72, 168]
 CORE = ["itransformer", "nbeatsx", "nhits", "patchtst", "tft", "tsmixerx"]

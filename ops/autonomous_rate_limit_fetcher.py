@@ -22,7 +22,7 @@ from typing import Any, Protocol
 import pandas as pd
 
 
-DEFAULT_OUT_DIR = Path("mbari_history/noaa/mur_sst_cache")
+DEFAULT_OUT_DIR = Path("mbal_history/noaa/mur_sst_cache")
 COASTWATCH_ERDDAP = "https://coastwatch.pfeg.noaa.gov/erddap"
 M1_LAT = 36.7511
 M1_LON = -122.0292

@@ -18,6 +18,7 @@ def test_grade_row_blocks_invalid_promotion_claim():
             "shared_split": "False",
             "candidate_n": 10,
             "candidate_skill_vs_persistence_pct": -1.0,
+            "candidate_skill_vs_best_naive_pct": -1.0,
             "xgb_delta_skill_pct": -0.1,
             "xgb_skill_vs_persistence_pct": 5.0,
         }
@@ -27,7 +28,7 @@ def test_grade_row_blocks_invalid_promotion_claim():
 
     assert grade == "do_not_claim"
     assert "not on shared split" in reasons
-    assert "does not beat persistence" in reasons
+    assert any("insufficient lift vs best-naive" in r for r in reasons)
 
 
 def test_grade_row_labels_weak_xgb_baseline_as_weak_not_strong():
@@ -36,6 +37,7 @@ def test_grade_row_labels_weak_xgb_baseline_as_weak_not_strong():
             "shared_split": True,
             "candidate_n": 52,
             "candidate_skill_vs_persistence_pct": 6.0,
+            "candidate_skill_vs_best_naive_pct": 6.0,
             "xgb_delta_skill_pct": 10.0,
             "xgb_skill_vs_persistence_pct": -4.0,
             "candidate_drivers_enabled": False,

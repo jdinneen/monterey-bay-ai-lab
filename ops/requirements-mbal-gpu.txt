@@ -1,0 +1,22 @@
+# Core ML and GPU forecasting stack.
+# PyTorch CUDA wheels are installed separately by create_mbal_envs.ps1.
+numpy>=1.26
+pandas>=2.2
+polars>=1.0
+pyarrow>=16.0
+duckdb>=1.0
+scipy>=1.13
+scikit-learn>=1.5
+xgboost>=2.1
+optuna>=3.6
+mlflow>=2.14
+matplotlib>=3.9
+seaborn>=0.13
+plotly>=5.22
+joblib>=1.4
+tqdm>=4.66
+rich>=13.7
+pydantic>=2.7
+pytest>=8.0
+# Delta Lake gold-layer cutover (open delta-rs writer; no JVM/Spark/Databricks product). See docs/delta_cutover_plan.md
+deltalake>=1.0

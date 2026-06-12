@@ -75,6 +75,12 @@ def _nvidia_smi() -> str | None:
     return win_smi if os.path.exists(win_smi) else None
 
 
+def _hidden_subprocess_kwargs() -> dict:
+    if sys.platform != "win32":
+        return {}
+    return {"creationflags": subprocess.CREATE_NO_WINDOW}
+
+
 def query_gpu_state() -> GpuState | None:
     """Return current VRAM state, or None when nvidia-smi is unavailable."""
     exe = _nvidia_smi()
@@ -86,7 +92,14 @@ def query_gpu_state() -> GpuState | None:
         "--format=csv,noheader,nounits",
     ]
     try:
-        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=8, check=False)
+        proc = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=8,
+            check=False,
+            **_hidden_subprocess_kwargs(),
+        )
     except Exception:
         return None
     if proc.returncode != 0 or not proc.stdout.strip():
@@ -120,6 +133,7 @@ def _powershell_json(script: str) -> object | None:
             text=True,
             timeout=12,
             check=False,
+            **_hidden_subprocess_kwargs(),
         )
     except Exception:
         return None
@@ -225,7 +239,7 @@ def format_denial(
     lines += [
         "",
         "Free VRAM first by stopping/finishing one of those jobs, or deliberately override with:",
-        "  set MBARI_GPU_GUARD_DISABLE=1",
+        "  set MBAL_GPU_GUARD_DISABLE=1",
     ]
     return "\n".join(lines)
 
@@ -238,10 +252,10 @@ def check_gpu_admission(
     max_used_pct: float | None = None,
 ) -> str | None:
     """Return a denial message, or None if the launch is admitted."""
-    if os.environ.get("MBARI_GPU_GUARD_DISABLE", "").lower() in {"1", "true", "yes"}:
+    if os.environ.get("MBAL_GPU_GUARD_DISABLE", "").lower() in {"1", "true", "yes"}:
         return None
-    reserve_mib = _env_int("MBARI_GPU_GUARD_RESERVE_MIB", DEFAULT_RESERVE_MIB) if reserve_mib is None else reserve_mib
-    max_used_pct = _env_float("MBARI_GPU_GUARD_MAX_USED_PCT", DEFAULT_MAX_USED_PCT) if max_used_pct is None else max_used_pct
+    reserve_mib = _env_int("MBAL_GPU_GUARD_RESERVE_MIB", DEFAULT_RESERVE_MIB) if reserve_mib is None else reserve_mib
+    max_used_pct = _env_float("MBAL_GPU_GUARD_MAX_USED_PCT", DEFAULT_MAX_USED_PCT) if max_used_pct is None else max_used_pct
     if max_used_pct > 1.0:
         max_used_pct = max_used_pct / 100.0
 
@@ -327,17 +341,33 @@ def estimate_neural_forecast_mib(
     if smoke:
         return 4096
     model_l = model.lower()
-    heavy = {"mbari_moe", "tft", "itransformer", "patchtst"}
+    
+    # Base memory for transformer-based models (scales with depth/experts)
+    base_memory = {"mbal_moe": 12_288, "tft": 10_240, "itransformer": 10_240, "patchtst": 8192}
+    
     medium = {"nhits", "nbeatsx", "tsmixerx"}
-    request = 8192 if model_l in heavy else 6144 if model_l in medium else 4096
+    
+    # MoE uses more VRAM due to multiple experts
+    if model_l in base_memory:
+        request = base_memory[model_l]
+    elif model_l in medium:
+        request = 6144
+    else:
+        request = 4096
+    
+    # Quantile loss adds memory for multiple quantile predictions
     if loss == "quantile":
         request += 1024
+    
+    # Driver exogenous features need additional host memory for batch processing
     if drivers:
         request += 2048
-    return min(request, 12_288)
+    
+    # Cap at RTX 5090 capacity
+    return min(request, 24_576)
 
 
-def estimate_mbari_train_mib(profile: str | None = None) -> int:
+def estimate_mbal_train_mib(profile: str | None = None) -> int:
     profile = (profile or "safe").lower()
     return {"safe": 8192, "medium": 10_240, "large": 12_288}.get(profile, 8192)
 

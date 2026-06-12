@@ -73,7 +73,7 @@ def main() -> int:
     bounded = [r for r in rows if r["tail_weeks"]]
 
     doc = [
-        "# MBARI Neural Model Comparison",
+        "# Monterey Bay AI Lab Neural Model Comparison",
         "",
         "Generated from `nn_results/*/summary.json`.",
         "",
@@ -99,3 +99,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Data health agent for MBARI local artifacts.
+"""Data health agent for Monterey Bay AI Lab local artifacts.
 
 The agent monitors coverage, gaps, driver freshness contracts, and duplicate metric
 identities. It writes JSON + Markdown and returns nonzero only on hard structural
@@ -19,7 +19,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from mbari_lakehouse import read_forecast_metrics
+from mbal_lakehouse import read_forecast_metrics
 
 
 STATUS_ORDER = {"PASS": 0, "WARN": 1, "FAIL": 2}
@@ -159,7 +159,7 @@ def check_driver_manifest(project_root: Path) -> Check:
 
 def _load_target_matrix(project_root: Path) -> pd.DataFrame | None:
     candidates = [
-        project_root / "mbari_big_analysis_results" / "m1_hourly_matrix.parquet",
+        project_root / "mbal_big_analysis_results" / "m1_hourly_matrix.parquet",
         project_root / "nn_cache" / "long_v2_past_only_fill_origin_observed_full.parquet",
     ]
     for path in candidates:
@@ -254,12 +254,12 @@ def check_metric_duplicates(project_root: Path) -> Check:
 
 def check_data_inventory(project_root: Path) -> Check:
     expected = [
-        "mbari_history/opendap/m1_history.parquet",
-        "mbari_history/opendap/m2_history.parquet",
-        "mbari_history/noaa/noaa_ndbc46042.parquet",
-        "mbari_history/noaa/noaa_coops.parquet",
-        "mbari_history/noaa/noaa_upwelling.parquet",
-        "mbari_history/noaa/noaa_drivers_daily.parquet",
+        "mbal_history/opendap/m1_history.parquet",
+        "mbal_history/opendap/m2_history.parquet",
+        "mbal_history/noaa/noaa_ndbc46042.parquet",
+        "mbal_history/noaa/noaa_coops.parquet",
+        "mbal_history/noaa/noaa_upwelling.parquet",
+        "mbal_history/noaa/noaa_drivers_daily.parquet",
         "nn_cache/drivers_hourly.parquet",
         "nn_cache/long_v3_past_only_fill_origin_observed_missingness_full.parquet",
     ]
@@ -267,7 +267,7 @@ def check_data_inventory(project_root: Path) -> Check:
     for rel in expected:
         path = project_root / rel
         rows.append({"path": rel, "exists": path.exists(), "size_mb": round(path.stat().st_size / 1024 / 1024, 3) if path.exists() else None})
-    mur_cache = project_root / "mbari_history" / "noaa" / "mur_sst_cache"
+    mur_cache = project_root / "mbal_history" / "noaa" / "mur_sst_cache"
     if mur_cache.exists():
         mur_files = sorted({*mur_cache.glob("mur_sst_*.parquet"), *mur_cache.glob("mur_*.parquet")})
     else:
@@ -304,7 +304,7 @@ def write_outputs(report: dict[str, Any], output_dir: Path) -> dict[str, str]:
     md_path = output_dir / "DATA_HEALTH_REPORT.md"
     json_path.write_text(json.dumps(report, indent=2, sort_keys=True, default=str), encoding="utf-8")
     lines = [
-        "# MBARI Data Health Agent",
+        "# Monterey Bay AI Lab Data Health Agent",
         "",
         f"- Overall status: **{report['overall_status']}**",
         f"- Generated: `{report['generated_at_utc']}`",
@@ -343,3 +343,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

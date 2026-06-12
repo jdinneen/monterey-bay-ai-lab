@@ -214,7 +214,7 @@ class GPUResourceMonitor:
                 capture_output=True, text=True
             )
             temp = float(result.stdout.strip())
-        except:
+        except (OSError, ValueError, subprocess.SubprocessError):
             temp = 0.0
         
         stats = {

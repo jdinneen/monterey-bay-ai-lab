@@ -225,6 +225,17 @@ def normalize_foundation_to_lakehouse(project_root: Path, run_id: str, apply: bo
             else:
                 aggregate = metrics
             write_parquet(aggregate_metrics_path, aggregate)
+            try:  # Phase-1 shadow dual-write — opt-in via MBAL_GOLD_SHADOW_DELTA=1, non-fatal
+                import sys as _sys
+                _root = str(Path(__file__).resolve().parents[1])
+                if _root not in _sys.path:
+                    _sys.path.insert(0, _root)
+                from ops.migrate_gold_to_delta import shadow_dual_write
+                shadow_dual_write(
+                    "forecast_metrics", aggregate, gold_dir=aggregate_metrics_path.parent.parent
+                )
+            except Exception:
+                pass
 
     return NormalizeResult(
         run_id=run_id,

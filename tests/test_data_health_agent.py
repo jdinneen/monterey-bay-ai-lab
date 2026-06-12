@@ -77,7 +77,7 @@ def test_driver_manifest_fails_when_manifest_column_missing_from_parquet(tmp_pat
 
 
 def test_target_coverage_warns_on_current_stale_gaps(tmp_path):
-    matrix_dir = tmp_path / "mbari_big_analysis_results"
+    matrix_dir = tmp_path / "mbal_big_analysis_results"
     matrix_dir.mkdir()
     idx = pd.date_range("2026-01-01T00:00:00Z", periods=5, freq="1h")
     data = {target: [1.0, 2.0, np.nan, np.nan, np.nan] for target in [
@@ -101,7 +101,7 @@ def test_target_coverage_warns_on_current_stale_gaps(tmp_path):
 
 
 def test_target_coverage_passes_when_only_historical_gaps_are_long(tmp_path):
-    matrix_dir = tmp_path / "mbari_big_analysis_results"
+    matrix_dir = tmp_path / "mbal_big_analysis_results"
     matrix_dir.mkdir()
     idx = pd.date_range("2026-01-01T00:00:00Z", periods=6, freq="1h")
     data = {target: [1.0, np.nan, np.nan, np.nan, 2.0, 3.0] for target in [
@@ -144,12 +144,12 @@ def test_metric_duplicate_check_allows_matching_aggregate_and_partition(tmp_path
 
 def test_data_inventory_warns_when_optional_mur_cache_missing(tmp_path):
     for rel in [
-        "mbari_history/opendap/m1_history.parquet",
-        "mbari_history/opendap/m2_history.parquet",
-        "mbari_history/noaa/noaa_ndbc46042.parquet",
-        "mbari_history/noaa/noaa_coops.parquet",
-        "mbari_history/noaa/noaa_upwelling.parquet",
-        "mbari_history/noaa/noaa_drivers_daily.parquet",
+        "mbal_history/opendap/m1_history.parquet",
+        "mbal_history/opendap/m2_history.parquet",
+        "mbal_history/noaa/noaa_ndbc46042.parquet",
+        "mbal_history/noaa/noaa_coops.parquet",
+        "mbal_history/noaa/noaa_upwelling.parquet",
+        "mbal_history/noaa/noaa_drivers_daily.parquet",
         "nn_cache/drivers_hourly.parquet",
     ]:
         path = tmp_path / rel
@@ -164,18 +164,18 @@ def test_data_inventory_warns_when_optional_mur_cache_missing(tmp_path):
 
 def test_data_inventory_accepts_legacy_mur_year_cache_names(tmp_path):
     for rel in [
-        "mbari_history/opendap/m1_history.parquet",
-        "mbari_history/opendap/m2_history.parquet",
-        "mbari_history/noaa/noaa_ndbc46042.parquet",
-        "mbari_history/noaa/noaa_coops.parquet",
-        "mbari_history/noaa/noaa_upwelling.parquet",
-        "mbari_history/noaa/noaa_drivers_daily.parquet",
+        "mbal_history/opendap/m1_history.parquet",
+        "mbal_history/opendap/m2_history.parquet",
+        "mbal_history/noaa/noaa_ndbc46042.parquet",
+        "mbal_history/noaa/noaa_coops.parquet",
+        "mbal_history/noaa/noaa_upwelling.parquet",
+        "mbal_history/noaa/noaa_drivers_daily.parquet",
         "nn_cache/drivers_hourly.parquet",
     ]:
         path = tmp_path / rel
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(b"placeholder")
-    mur_cache = tmp_path / "mbari_history" / "noaa" / "mur_sst_cache"
+    mur_cache = tmp_path / "mbal_history" / "noaa" / "mur_sst_cache"
     mur_cache.mkdir(parents=True)
     (mur_cache / "mur_2002.parquet").write_bytes(b"placeholder")
 

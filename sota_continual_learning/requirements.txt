@@ -1,16 +1,17 @@
 # Core ML framework (used everywhere)
 torch>=2.0.0
 
-# Data processing
+# Data processing (data.py uses sklearn for datasets)
 scikit-learn>=1.5.0
+
+# Utilities used throughout
 numpy>=1.26.0
-pandas>=2.0.0
-pyarrow>=14.0.0
 
 # Plotting (monitor.py only)
 matplotlib>=3.9.0
 
-# GPU / process monitoring
+# GPU monitoring (monitor.py only)  
 psutil>=6.0.0
 
-# Note: argparse, logging, pathlib, random, typing are part of the Python stdlib.
+# Logging and CLI
+# argparse, logging, pathlib, random, typing are part of Python stdlib

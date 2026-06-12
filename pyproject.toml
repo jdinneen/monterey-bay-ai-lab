@@ -3,17 +3,18 @@ requires = ["setuptools>=69", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "mbari-ai-forecasting"
+name = "monterey-bay-ai-lab"
 version = "0.1.0"
-description = "Reproducible Monterey Bay ocean forecasting experiments with honest naive-baseline evaluation."
+description = "Local Monterey Bay AI Lab coastal forecasting, model validation, and release-gate tooling."
 requires-python = ">=3.12"
 readme = "README.md"
 license = { text = "Apache-2.0" }
-authors = [{ name = "Monterey Bay Ocean Forecasting Lab" }]
+authors = [{ name = "Monterey Bay AI Lab" }]
 dependencies = [
   "duckdb",
   "numpy",
   "pandas",
+  "PyYAML",
   "pyarrow",
   "scikit-learn",
   "torch",
@@ -23,6 +24,12 @@ dependencies = [
 [project.optional-dependencies]
 test = [
   "pytest",
+]
+# Phase-0 gated dependency for the gold -> Delta Lake cutover (open delta-rs
+# writer; no JVM/Spark/Databricks product). Tooling degrades gracefully without it.
+# See docs/delta_cutover_plan.md.
+delta = [
+  "deltalake>=1.0",
 ]
 analysis = [
   "scipy",
@@ -42,6 +49,7 @@ geo = [
   "google-cloud-bigquery-storage",
   "h5netcdf",
   "netCDF4",
+  "openpyxl",
   "pandera",
   "requests",
   "xarray",
@@ -53,68 +61,29 @@ neural = [
   "tensorboard",
   "tensorboardX",
 ]
+# Aggregate extras are composed from the tiered groups above (self-referencing
+# optional-dependencies, setuptools>=69) so the package lists never drift out of sync.
 all = [
-  "aiohttp",
-  "beautifulsoup4",
-  "chronos-forecasting",
-  "dask[complete]",
-  "db-dtypes",
-  "fsspec",
-  "google-cloud-bigquery",
-  "google-cloud-bigquery-storage",
-  "h5netcdf",
-  "netCDF4",
-  "neuralforecast",
-  "pandas-gbq",
-  "pandera",
-  "pytorch-lightning",
-  "requests",
-  "scipy",
-  "statsmodels",
-  "tensorboard",
-  "tensorboardX",
-  "xarray",
-  "zarr",
+  "monterey-bay-ai-lab[analysis,foundation,geo,neural]",
 ]
 dev = [
-  "pytest",
-  "chronos-forecasting",
-  "scipy",
-  "pandas-gbq",
-  "statsmodels",
-  "aiohttp",
-  "beautifulsoup4",
-  "dask[complete]",
-  "db-dtypes",
-  "fsspec",
-  "google-cloud-bigquery",
-  "google-cloud-bigquery-storage",
-  "h5netcdf",
-  "netCDF4",
-  "neuralforecast",
-  "pandera",
-  "pytorch-lightning",
-  "requests",
-  "tensorboard",
-  "tensorboardX",
-  "xarray",
-  "zarr",
+  "monterey-bay-ai-lab[all,test]",
 ]
 
 [tool.setuptools]
 py-modules = [
-  "mbari_core",
-  "mbari_deep_models",
-  "mbari_drivers_build",
-  "mbari_forecast_v2",
-  "mbari_gpu_analysis",
-  "mbari_neural_forecast",
-  "mbari_split_contracts",
-  "mbari_train",
+  "mbal_core",
+  "mbal_deep_models",
+  "mbal_drivers_build",
+  "mbal_forecast_v2",
+  "mbal_gpu_analysis",
+  "mbal_neural_forecast",
+  "mbal_split_contracts",
+  "mbal_train",
 ]
 
 [tool.setuptools.packages.find]
-where = ["mbari_pipeline", "mbari_experiments"]
+where = ["mbal_pipeline", "mbal_experiments"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -125,7 +94,7 @@ addopts = "-q"
 target-version = "py312"
 line-length = 100
 extend-exclude = [
-  "mbari_history",
+  "mbal_history",
   "lakehouse",
   "nn_results",
   "nn_cache",

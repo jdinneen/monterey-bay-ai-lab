@@ -1,0 +1,67 @@
+{
+  "_headline": {
+    "note": "The pooled numbers below are NOT the fundable headline. Pooled all-county AP/ROC-AUC are dominated by San Diego (large volume, ~60% base rate, AP~0.96) and overstate generalization. The honest operational headline is the leave-one-county-out result in reproduce/expected/spatial_holdout.json.",
+    "operational_headline_source": "research/bacteria/reproduce/expected/spatial_holdout.json",
+    "leave_one_county_out_median_ap": 0.5222,
+    "counties_model_beats_ab411_baseline": "9/9",
+    "counties_deploy_ready": "8/9",
+    "san_diego_excluded_macro_ap": 0.4531,
+    "san_diego_excluded_macro_roc_auc": 0.826,
+    "pooled_figures_caveat": "statewide_with_rainfall AP/ROC-AUC are the pooled, San-Diego-dominated cut; report the leave-one-county-out figures instead."
+  },
+  "statewide_with_rainfall": {
+    "label": "statewide + rainfall",
+    "n_features": 39,
+    "rows": 475669,
+    "train": 357414,
+    "valid": 56317,
+    "test": 61938,
+    "test_events": 14883,
+    "test_event_rate": 0.2403,
+    "model": "rf",
+    "avg_precision": 0.8782,
+    "roc_auc": 0.9362
+  },
+  "statewide_without_rainfall": {
+    "label": "statewide WITHOUT rainfall",
+    "n_features": 39,
+    "rows": 475669,
+    "train": 357414,
+    "valid": 56317,
+    "test": 61938,
+    "test_events": 14883,
+    "test_event_rate": 0.2403,
+    "model": "rf",
+    "avg_precision": 0.8676,
+    "roc_auc": 0.9293
+  },
+  "statewide_no_lab_history_ablation": {
+    "label": "statewide NO lab-history (persistence ablation)",
+    "n_features": 17,
+    "rows": 475669,
+    "train": 357414,
+    "valid": 56317,
+    "test": 61938,
+    "test_events": 14883,
+    "test_event_rate": 0.2403,
+    "model": "rf",
+    "avg_precision": 0.841,
+    "roc_auc": 0.9115
+  },
+  "monterey_only": {
+    "label": "Monterey-only (same features)",
+    "n_features": 39,
+    "rows": 4700,
+    "train": 3352,
+    "valid": 657,
+    "test": 691,
+    "test_events": 24,
+    "test_event_rate": 0.0347,
+    "model": "rf",
+    "avg_precision": 0.0838,
+    "roc_auc": 0.6206
+  },
+  "hab_verdict": "HAB tables are FRESHWATER cyanobacteria (reservoirs/lakes), not coastal/marine; excluded by coverage gate, no lift",
+  "total_events_all_history": 59710,
+  "beaches": 830
+}

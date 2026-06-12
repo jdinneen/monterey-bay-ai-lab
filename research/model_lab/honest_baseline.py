@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Honest skill baseline — persistence AND seasonal-naive (same-hour-yesterday).
 
-Tracked, committable companion to mbari_neural_merge.py. The published leaderboard scores
+Tracked, committable companion to mbal_neural_merge.py. The published leaderboard scores
 skill vs PERSISTENCE only, which is unfairly weak at diurnal horizons (+24/72/168h) where
 "yesterday's value" is a strong free baseline. This module re-scores every full-history model
 against the BETTER of {persistence, seasonal-naive} — the baseline a reviewer actually demands —
@@ -9,7 +9,7 @@ and writes HONEST_SKILL_BASELINE.md so the real margin is version-controlled, no
 untracked scratch scripts.
 
 Read-only over nn_cache (panel+mask) and nn_results/<model>/cv_predictions.parquet. No training.
-Scoring matches mbari_neural_forecast.evaluate(): observed target points only; persistence = obs
+Scoring matches mbal_neural_forecast.evaluate(): observed target points only; persistence = obs
 at the forecast origin; seasonal-naive = obs at ds-24h; all baselines + model on a common subset.
 """
 from __future__ import annotations
@@ -18,7 +18,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-PROJECT_ROOT = Path(os.environ.get("MBARI_PROJECT_ROOT", Path(__file__).resolve().parents[2])).resolve()
+PROJECT_ROOT = Path(os.environ.get("MBAL_PROJECT_ROOT", Path(__file__).resolve().parents[2])).resolve()
 NNC = PROJECT_ROOT / "nn_cache"
 NNR = PROJECT_ROOT / "nn_results"
 OUT = Path(__file__).resolve().parent / "HONEST_SKILL_BASELINE.md"
@@ -88,7 +88,7 @@ def main():
     # best model per (series,horizon) by skill vs best-naive — the honest leaderboard
     best = big.sort_values("skill_vs_bestnaive").groupby(["unique_id", "horizon_h"]).tail(1)
 
-    L = ["# MBARI — Honest Skill Baseline (persistence vs seasonal-naive)", "",
+    L = ["# MBAL — Honest Skill Baseline (persistence vs seasonal-naive)", "",
          "Skill vs PERSISTENCE alone is unfairly easy at diurnal horizons (+24/72/168h), where",
          "seasonal-naive (same-hour-yesterday) is a strong free baseline. The honest metric is skill",
          "vs the BETTER of the two. Median across the 24 series; full-history runs only.", "",

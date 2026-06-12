@@ -8,7 +8,7 @@ makes the honest baseline binding: a candidate must beat the BETTER of
 
 This module is the single source of truth for that computation. It re-scores every
 gold prediction partition against persistence and seasonal-naive on one common,
-observed + origin-observed subset (matching ``mbari_neural_forecast.evaluate`` and
+observed + origin-observed subset (matching ``mbal_neural_forecast.evaluate`` and
 ``research/model_lab/honest_baseline``) and returns a per-cell table keyed by
 ``run_id, split_id, unique_id, horizon_h``.
 
@@ -66,7 +66,7 @@ def load_observed_panel(project_root: Path) -> pd.Series | None:
     Returns ``None`` when the cached panel/mask are unavailable so callers can
     fail closed rather than silently scoring against a partial baseline.
     """
-    cache = Path(os.environ.get("MBARI_CACHE_DIR", project_root / "nn_cache"))
+    cache = Path(os.environ.get("MBAL_CACHE_DIR", project_root / "nn_cache"))
     long_path = cache / "long_v2_past_only_fill_origin_observed_full.parquet"
     mask_path = cache / "mask_v2_past_only_fill_origin_observed_full.parquet"
     if not long_path.exists() or not mask_path.exists():
@@ -173,7 +173,7 @@ def seasonal_naive_table(project_root: Path, *, min_observations: int = 3) -> pd
     if obs_val is None:
         return _empty_table()
     pred_root = Path(
-        os.environ.get("MBARI_LAKEHOUSE_DIR", project_root / "lakehouse")
+        os.environ.get("MBAL_LAKEHOUSE_DIR", project_root / "lakehouse")
     ) / "gold" / "forecast_predictions"
     if not pred_root.exists():
         return _empty_table()

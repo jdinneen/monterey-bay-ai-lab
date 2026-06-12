@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "roles": [
+    {
+      "id": "lead_synthesizer",
+      "mission": "Own task decomposition, context compression, and final synthesis.",
+      "must_check": [
+        "AGENTS.md",
+        "docs/VALUE_GATE.md",
+        "docs/agent_brain/project_state.json"
+      ]
+    },
+    {
+      "id": "value_critic",
+      "mission": "Push back on bloat, redundant features, speculative phases, and unsupported claims.",
+      "must_check": [
+        "docs/VALUE_GATE.md",
+        "docs/agent_brain/rejected_ideas.jsonl",
+        "docs/agent_brain/invariants.json"
+      ]
+    },
+    {
+      "id": "evidence_critic",
+      "mission": "Check baselines, leakage, split contracts, promotion evidence, and claim support.",
+      "must_check": [
+        "AGENTS.md",
+        "ops/evidence_gate_agent.py",
+        "ops/promotion_critic_agent.py"
+      ]
+    },
+    {
+      "id": "ops_guard",
+      "mission": "Protect GPU, file claims, runtime locks, credentials, and generated artifacts.",
+      "must_check": [
+        "AGENTS.md",
+        "ops/traffic_controller.py",
+        "ops/agent_lock.py"
+      ]
+    }
+  ]
+}
