@@ -1,0 +1,287 @@
+# Monterey Bay AI Lab — Model Registry (single source of truth)
+#
+# One entry per model. The suite (research/model_lab/model_suite.py) validates this file and
+# renders MODEL_SUITE.md from it. FAIL-CLOSED: a model is "claimable" only if it is listed here
+# with claimable: true AND an existing evidence file. Anything unlisted is not claimable.
+#
+# status enum:
+#   production_candidate      - beats the honest baseline, calibrated, validated; lead with it
+#   benchmark                 - a comparator we run to bound/contextualize, not a headline claim
+#   research_candidate        - exploratory; not validated as a win
+#   research_only_failed_gate - ran, but FAILED the value gate (does not beat best-naive); shelved
+#   negative_result           - the result IS that there is no effect; a deliverable, not a model
+#   baseline                  - an operational/regulatory comparator (what we must beat)
+#   retired_claim             - a claim we withdrew (kept only as a cautionary record)
+#   orphaned                  - appeared in champion/selector evidence but has NO reproducible
+#                               serving path; a historical horizon-specific artifact, not runnable
+# family enum: tree | neural | foundation | continual | baseline | detector
+# task enum:   bacteria_classification | m1_forecasting | bacteria_event_detection |
+#              domoic_acid_forecasting
+#
+# Optional hardening fields (consumed by the model-hardening audit; not required for validation):
+#   smoke_command     - the exact, output-isolated command that exercises this model cheaply;
+#                       "" means no cheap smoke seam exists (heavy run, orphaned, or zero-shot rerun).
+#   baseline          - the honest baseline this model must beat to be claimable.
+#   output_dir_policy - where this model is allowed to write; how production outputs are protected.
+
+models:
+  - model_id: bacteria_hgbt_isotonic
+    family: tree
+    architecture: HistGradientBoostingClassifier + isotonic calibration
+    task: bacteria_classification
+    status: production_candidate
+    claimable: true
+    beats_baseline: "yes — beats AB411, Virtual-Beach MLR, and station-memory"
+    supports_calibration: true
+    dependencies: [scikit-learn]
+    entrypoint: research/bacteria/operational_benchmark.py
+    smoke_command: "python research/model_lab/model_suite.py --suite bacteria"
+    baseline: "AB411 rain rule, Virtual-Beach MLR, station-memory"
+    output_dir_policy: "reports/operational_benchmark/ (suite writes model_suite_bacteria.json); never overwrites production leaderboards"
+    evidence: research/bacteria/reproduce/expected/operational_benchmark.json
+    blockers: "prospective forward-time pilot + partner available_at lab timestamps"
+    notes: >-
+      Incumbent champion. San-Diego-excluded enterococcus, operational
+      reveal_lag_days=2 config — the tracked reproduction evidence
+      (research/bacteria/reproduce/expected/operational_benchmark.json):
+      ROC-AUC 0.858 / AP 0.497 / ECE 0.020; 9/9 leave-one-county-out wins.
+      Byte-reproducible from a clean clone; same model within noise across
+      reveal lags. Full derivation in research/bacteria/reproduce/PAPER_DRAFT.md.
+
+  - model_id: bacteria_hgbt_spatial
+    family: tree
+    architecture: HistGradientBoostingClassifier + isotonic, with raw lat/lon + neighbour-lag spatial arms
+    task: bacteria_classification
+    status: negative_result
+    claimable: false
+    beats_baseline: "no — raw coordinates and neighbour-lag are a wash (all spatial arms AP 0.497 = the no-spatial driver model); per-station/county/statewide rate features already encode location"
+    supports_calibration: true
+    dependencies: [scikit-learn]
+    entrypoint: research/bacteria/spatial_drivers_experiment.py
+    smoke_command: "python research/bacteria/spatial_drivers_experiment.py --k 2 --n-perm 1 --out-dir reports/model_hardening/smoke/spatial"
+    baseline: "no-spatial driver HGBT (must add AP on never-seen beaches); AB411 / Virtual-Beach MLR / station-memory"
+    output_dir_policy: "research/bacteria/reproduce/ artifacts; LOBO study, not a production leaderboard"
+    evidence: research/bacteria/spatial_drivers_experiment.py
+    blockers: "raw-coordinate spatial surface does not beat the no-spatial driver model; physical covariates (outfall/river-mouth distance) untested"
+    notes: >-
+      NEGATIVE RESULT (not claimable). Adding raw station coordinates or a k-nearest-beach
+      exceedance lag to the driver model yields no measurable lift — every spatial arm scores
+      AP 0.497 / ROC-AUC 0.859 / ECE 0.008, identical to no-spatial, with residual Moran's I
+      unchanged at 0.228. The per-station (station_prior_rate) and county/statewide rate
+      features already capture location. (An earlier entry claimed +0.034 AP; that did not
+      reproduce — a merge-collision had NaN-filled the coordinate columns; fixed, the arms are
+      a clean wash.) The genuinely positive, reproducible finding lives with the headline model
+      bacteria_hgbt_isotonic: it GENERALIZES to never-seen beaches (leave-one-beach-out
+      AP 0.494 / ROC-AUC 0.852 via research/bacteria/spatial_autocorr.py). Residual per-beach
+      autocorrelation (Moran's I 0.20, p=0.001) means physical spatial covariates remain the
+      open lever for unmonitored-site risk.
+
+  - model_id: bacteria_xgboost
+    family: tree
+    architecture: XGBoost gradient-boosted trees + isotonic calibration
+    task: bacteria_classification
+    status: benchmark
+    claimable: false
+    beats_baseline: "comparator — run via the suite to test the data ceiling vs HGBT"
+    supports_calibration: true
+    dependencies: [xgboost]
+    entrypoint: research/model_lab/model_suite.py
+    smoke_command: "python research/model_lab/model_suite.py --suite bacteria"
+    baseline: "AB411 rain rule, Virtual-Beach MLR, station-memory (and the HGBT data ceiling)"
+    output_dir_policy: "reports/operational_benchmark/model_suite_bacteria.json (comparator); never a production leaderboard"
+    evidence: ""
+    blockers: "promote only if it beats the best operational baseline AND calibrates (it won't materially beat HGBT — data ceiling)"
+    notes: "Second tree family, to demonstrate the bacteria ceiling is the DATA, not the model class."
+
+  - model_id: xgboost_forecast_v2
+    family: tree
+    architecture: XGBoost regressor, walk-forward, delta-modeled
+    task: m1_forecasting
+    status: benchmark
+    claimable: false
+    beats_baseline: "horizon-specific — gated by best-naive (ops/seasonal_naive.py); +72h tier rejected"
+    supports_calibration: false
+    dependencies: [xgboost]
+    entrypoint: mbal_forecast_v2.py
+    smoke_command: "python mbal_forecast_v2.py --smoke --output-dir reports/model_hardening/smoke/forecast_v2"
+    baseline: "best-naive (seasonal-naive / persistence) per target+horizon cell"
+    output_dir_policy: "production: mbal_forecast_v2_results/ ONLY via a non-smoke parquet run; smoke MUST use --output-dir elsewhere (release gate rejects smoke as production)"
+    evidence: ""
+    blockers: "promotion is per target/horizon cell via release_gate/mbal_promotion_matrix.py"
+    notes: "Leakage-corrected production-style forecasting baseline. Promotions are cell-level, not global."
+
+  - model_id: patchtst
+    family: neural
+    architecture: PatchTST (Nixtla neuralforecast)
+    task: m1_forecasting
+    status: benchmark
+    claimable: false
+    beats_baseline: "horizon-specific; best aggregate full-history neural run"
+    supports_calibration: false
+    dependencies: [neuralforecast]
+    entrypoint: mbal_neural_forecast.py
+    smoke_command: "python mbal_neural_forecast.py --model patchtst --smoke --series temp_d10p0 --outdir reports/model_hardening/smoke/patchtst"
+    baseline: "best-naive (seasonal-naive / persistence) per target+horizon cell"
+    output_dir_policy: "isolated per-run --outdir; a separate merge step builds the leaderboard; smoke must not target lakehouse/gold"
+    evidence: ""
+    blockers: "must clear the best-naive gate per cell"
+    notes: "M1 forecasting is persistence-ceilinged; neural buys little here."
+
+  - model_id: nhits
+    family: neural
+    architecture: NHITS (Nixtla neuralforecast)
+    task: m1_forecasting
+    status: research_candidate
+    claimable: false
+    beats_baseline: "not established"
+    supports_calibration: false
+    dependencies: [neuralforecast]
+    entrypoint: mbal_neural_forecast.py
+    smoke_command: "python mbal_neural_forecast.py --model nhits --smoke --series temp_d10p0 --outdir reports/model_hardening/smoke/nhits"
+    baseline: "best-naive (seasonal-naive / persistence) per target+horizon cell"
+    output_dir_policy: "isolated per-run --outdir; a separate merge step builds the leaderboard; smoke must not target lakehouse/gold"
+    evidence: ""
+    blockers: "no validated win over best-naive"
+    notes: ""
+
+  - model_id: early_warning_cusum
+    family: detector
+    architecture: Pre-registered one-sided CUSUM drift detector
+    task: bacteria_event_detection
+    status: negative_result
+    claimable: false
+    beats_baseline: "NO — a NULL result; the SD-2022 break is a ~35-sigma step any detector flags"
+    supports_calibration: false
+    dependencies: [scikit-learn]
+    entrypoint: research/bacteria/early_warning.py
+    smoke_command: "python research/bacteria/early_warning.py"
+    baseline: "any-detector null — the SD-2022 break is a ~35-sigma step"
+    output_dir_policy: "research/bacteria/ (documented null result); do not feed a production leaderboard"
+    evidence: research/bacteria/early_warning.py
+    blockers: "n/a — documented null; do not revive as a contribution"
+    notes: "Detection LAGS the cited 2022-04 institutional recognition; the early-warning framing was dropped."
+
+  - model_id: ab411_rain_rule
+    family: baseline
+    architecture: Regulatory wet-weather rule (rain_3d >= 0.1in)
+    task: bacteria_classification
+    status: baseline
+    claimable: false
+    beats_baseline: "n/a — this is the deployed practice we must beat (AP ~0.18 SD-excluded)"
+    supports_calibration: false
+    dependencies: []
+    entrypoint: research/bacteria/operational_benchmark.py
+    smoke_command: "python research/model_lab/model_suite.py --suite bacteria"
+    baseline: "n/a — this IS the deployed regulatory baseline"
+    output_dir_policy: "n/a — computed inline by operational_benchmark"
+    evidence: ""
+    blockers: "n/a"
+    notes: "California AB411 advisory rule."
+
+  - model_id: virtual_beach_mlr
+    family: baseline
+    architecture: Virtual-Beach-class per-site multiple logistic regression
+    task: bacteria_classification
+    status: baseline
+    claimable: false
+    beats_baseline: "n/a — the deployed tool we'd replace (AP ~0.38 SD-excluded)"
+    supports_calibration: false
+    dependencies: [scikit-learn]
+    entrypoint: research/bacteria/operational_benchmark.py
+    smoke_command: "python research/model_lab/model_suite.py --suite bacteria"
+    baseline: "n/a — this IS a deployed operational baseline"
+    output_dir_policy: "n/a — computed inline by operational_benchmark"
+    evidence: ""
+    blockers: "n/a"
+    notes: "Faithful reimplementation of EPA Virtual Beach's METHOD."
+
+  - model_id: station_memory
+    family: baseline
+    architecture: Station prior-exceedance-rate memory
+    task: bacteria_classification
+    status: baseline
+    claimable: false
+    beats_baseline: "n/a — strong baseline (AP ~0.28 SD-excluded); the bar drivers must beat"
+    supports_calibration: false
+    dependencies: []
+    entrypoint: research/bacteria/operational_benchmark.py
+    smoke_command: "python research/model_lab/model_suite.py --suite bacteria"
+    baseline: "n/a — this IS the strong operational baseline drivers must beat"
+    output_dir_policy: "n/a — computed inline by operational_benchmark"
+    evidence: ""
+    blockers: "n/a"
+    notes: "A recently-dirty beach tends to stay dirty."
+
+  # ---------------------------------------------------------------- domoic-acid / marine-HAB task
+  - model_id: da_forecast_hgbt
+    family: tree
+    architecture: HistGradientBoostingClassifier + isotonic calibration (DA-history + Pseudo-nitzschia precursor)
+    task: domoic_acid_forecasting
+    status: production_candidate
+    claimable: true
+    beats_baseline: "yes — AP 0.232 vs best-naive 0.138; also beats NOAA C-HARM v3.1 nowcast 8/8 stations"
+    supports_calibration: true
+    dependencies: [scikit-learn]
+    entrypoint: research/hab/da_forecast.py
+    smoke_command: "python research/hab/da_forecast.py"
+    baseline: "seasonal-naive / persistence / station-memory; operational incumbent = NOAA C-HARM v3.1 nowcast"
+    output_dir_policy: "reports/hab/ (da_forecast.json / da_forecast.md); never a production leaderboard"
+    evidence: reports/hab/da_forecast.json
+    blockers: >-
+      small test-event count (52 events > 2020); weekly CalHABMAP sampling = ~1-week lead;
+      needs a prospective forward-time pilot before an operational claim.
+    notes: >-
+      Next-visit pDA >= 0.5 ng/mL (=500 ng/L, the C-HARM/CDPH event threshold) at CalHABMAP
+      piers, strictly causal (features from the prior visit only). Time holdout (train <=2018,
+      isotonic-calibrate 2019-2020, test >2020) + leave-one-station-out: model beats seasonal-
+      naive 8/8 stations. Crucially beats the operational NOAA C-HARM nowcast (which uses SAME-day
+      satellite+ROMS) 8/8 stations on the 2022-2026 overlap (pooled AP 0.271 vs C-HARM 0.027;
+      C-HARM is badly miscalibrated here). C-HARM evidence: reports/hab/charm_comparison.json (a
+      FROZEN comparison — regenerating the C-HARM side needs a live CoastWatch ERDDAP fetch). The
+      DA model itself reproduces offline from the shipped 304 KB CalHABMAP input
+      (data/external_curated/habmap_cdph/habmap_cdph.parquet) via `python research/hab/da_forecast.py`.
+      The physical/nutrient DRIVERS were tested and HURT
+      (same driver-null pattern as M1 / bacteria / news / wave-tide), so the headline is the lean
+      DA+precursor set, NOT the full driver matrix. This is the marine-HAB frontier headline,
+      separate from the fundable bacteria headline.
+
+  - model_id: hab_sota_hgbt
+    family: tree
+    architecture: HistGradientBoostingClassifier over all normalized lakehouse signals (external context)
+    task: domoic_acid_forecasting
+    status: research_only_failed_gate
+    claimable: false
+    beats_baseline: "no — adding the external-context signals does NOT beat the lean DA+precursor incumbent (gate is +0.005 AP)"
+    supports_calibration: true
+    dependencies: [scikit-learn]
+    entrypoint: research/hab/hab_sota_sweep.py
+    smoke_command: "python research/hab/hab_sota_sweep.py"
+    baseline: "the lean DA+precursor incumbent (da_forecast_hgbt) + best-naive"
+    output_dir_policy: "reports/hab/ (hab_sota_sweep.json / .md) + lakehouse/silver/hab/hab_sota_panel.parquet"
+    evidence: ""
+    blockers: >-
+      all_normalized_signals AP 0.181 and external_context AP 0.235 vs lean incumbent 0.232
+      (gap below the +0.005 gate) -- context signals are a WASH/HURT on this target. Kept as the
+      honest 'more data did not help' ablation, not a promotion.
+    notes: >-
+      The 'throw every normalized signal at it' sweep. Records the negative/wash result honestly:
+      the correct SOTA stays lean. Currently joins only the OLDER curated external sources
+      (mur_sst, viirs_chl, cencoos OA/moorings, hf_radar, caloes, noaa_upwelling); the 20 new
+      buildout sources are a separate injection test (claude-fetch-A, model-bench phase).
+
+  - model_id: charm_da_nowcast
+    family: baseline
+    architecture: NOAA C-HARM v3.1 operational nowcast — P[particulate DA > 500 ng/L] (same-day satellite + ROMS)
+    task: domoic_acid_forecasting
+    status: baseline
+    claimable: false
+    beats_baseline: "n/a — this IS the operational incumbent our prior-visit forecast must beat (and does, 8/8)"
+    supports_calibration: false
+    dependencies: []
+    entrypoint: research/hab/charm_comparison.py
+    smoke_command: "python research/hab/charm_comparison.py"
+    baseline: "n/a — this IS the deployed operational HAB nowcast"
+    output_dir_policy: "reports/hab/ (charm_comparison.json / .md); comparator, never a production leaderboard"
+    evidence: ""
+    blockers: "n/a — operational comparator; badly miscalibrated on the CalHABMAP-pier overlap (mean p=0.69 vs 4% base)"
+    notes: "NOAA C-HARM v3.1. Documented so the DA forecast's win over deployed practice is on the record."

@@ -9,7 +9,7 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from release_gate import mbari_release_gate as rg  # noqa: E402
+from release_gate import mbal_release_gate as rg  # noqa: E402
 
 
 def _check(name: str, status: str = "PASS") -> rg.Check:
@@ -208,8 +208,8 @@ def test_promotion_matrix_check_reports_unique_promotion_counts(tmp_path):
 
 
 def test_historical_parquet_warns_when_auxiliary_check_fails(tmp_path, monkeypatch):
-    production = tmp_path / "mbari_history" / "opendap" / "m1_history.parquet"
-    auxiliary = tmp_path / "mbari_history" / "noaa" / "bad_aux.parquet"
+    production = tmp_path / "mbal_history" / "opendap" / "m1_history.parquet"
+    auxiliary = tmp_path / "mbal_history" / "noaa" / "bad_aux.parquet"
     production.parent.mkdir(parents=True)
     auxiliary.parent.mkdir(parents=True)
     production.touch()

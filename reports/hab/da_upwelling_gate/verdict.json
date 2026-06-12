@@ -1,0 +1,18 @@
+{
+  "window_days": 45,
+  "n_test": 1837,
+  "events": 52,
+  "base_ap": 0.2322,
+  "cand_ap": 0.2256,
+  "delta_ap": -0.0066,
+  "loso": {
+    "base_ap": 0.2858,
+    "cand_ap": 0.2163
+  },
+  "loso_delta_ap": -0.0695,
+  "upwelling_feats": [
+    "beuti_win",
+    "cuti_win"
+  ],
+  "verdict": "REJECT"
+}

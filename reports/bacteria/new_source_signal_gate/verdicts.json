@@ -1,0 +1,191 @@
+{
+  "label": "enterococcus",
+  "excluded_counties": [
+    "San Diego"
+  ],
+  "reveal_lag_days": 2,
+  "k_neighbors": 8,
+  "min_lift_ap": 0.005,
+  "n_test": 89321,
+  "events": 8999,
+  "base_rate": 0.1007,
+  "baseline": {
+    "feats": "ob.FEATS + rainfall (established operational model)",
+    "ap": 0.4614,
+    "ece": 0.0098,
+    "residual_morans_i": 0.2403,
+    "lobo_ap": 0.4641
+  },
+  "candidates": [
+    {
+      "name": "openmeteo_temp",
+      "level": 2,
+      "note": "NEW source 'open_meteo_archive' as a bacteria signal (driver-null prior \u2014 expect WASH)",
+      "added_feats": [
+        "openmeteo_temp_prev",
+        "openmeteo_temp_roll7"
+      ],
+      "ap": 0.4745,
+      "delta_ap": 0.0131,
+      "ece": 0.0105,
+      "residual_morans_i": 0.2279,
+      "morans_delta": -0.0124,
+      "lobo_delta_ap": 0.005,
+      "verdict": "KEEP",
+      "reason": "temporal AP +0.0131, survives LOBO (+0.0050)"
+    },
+    {
+      "name": "ghcnd_precip",
+      "level": 2,
+      "note": "NEW source 'ghcnd' as a bacteria signal (driver-null prior \u2014 expect WASH)",
+      "added_feats": [
+        "ghcnd_precip_prev",
+        "ghcnd_precip_roll7"
+      ],
+      "ap": 0.4663,
+      "delta_ap": 0.0049,
+      "ece": 0.0111,
+      "residual_morans_i": 0.2436,
+      "morans_delta": 0.0033,
+      "lobo_delta_ap": 0.0062,
+      "verdict": "WASH",
+      "reason": "temporal AP move +0.0049 < 0.005 (noise)"
+    },
+    {
+      "name": "buoy_wind",
+      "level": 2,
+      "note": "NEW source 'ndbc_cwind' as a bacteria signal (driver-null prior \u2014 expect WASH)",
+      "added_feats": [
+        "buoy_wind_prev",
+        "buoy_wind_roll7"
+      ],
+      "ap": 0.4649,
+      "delta_ap": 0.0035,
+      "ece": 0.0078,
+      "residual_morans_i": 0.2448,
+      "morans_delta": 0.0045,
+      "lobo_delta_ap": 0.0062,
+      "verdict": "WASH",
+      "reason": "temporal AP move +0.0035 < 0.005 (noise)"
+    },
+    {
+      "name": "sst_buoy",
+      "level": 2,
+      "note": "NEW source 'cdip_sst_network' as a bacteria signal (driver-null prior \u2014 expect WASH)",
+      "added_feats": [
+        "sst_buoy_prev",
+        "sst_buoy_roll7"
+      ],
+      "ap": 0.4614,
+      "delta_ap": 0.0,
+      "ece": 0.0098,
+      "residual_morans_i": 0.2403,
+      "morans_delta": 0.0,
+      "lobo_delta_ap": 0.0,
+      "verdict": "WASH",
+      "reason": "temporal AP move +0.0000 < 0.005 (noise)"
+    },
+    {
+      "name": "wave_network",
+      "level": 2,
+      "note": "NEW source 'cdip_wave_network' as a bacteria signal (driver-null prior \u2014 expect WASH)",
+      "added_feats": [
+        "wave_network_prev",
+        "wave_network_roll7"
+      ],
+      "ap": 0.4614,
+      "delta_ap": 0.0,
+      "ece": 0.0098,
+      "residual_morans_i": 0.2403,
+      "morans_delta": 0.0,
+      "lobo_delta_ap": 0.0,
+      "verdict": "WASH",
+      "reason": "temporal AP move +0.0000 < 0.005 (noise)"
+    },
+    {
+      "name": "usgs_watertemp",
+      "level": 2,
+      "note": "NEW source 'usgs_dv_statewide' as a bacteria signal (driver-null prior \u2014 expect WASH)",
+      "added_feats": [
+        "usgs_watertemp_prev",
+        "usgs_watertemp_roll7"
+      ],
+      "ap": 0.4607,
+      "delta_ap": -0.0007,
+      "ece": 0.0098,
+      "residual_morans_i": 0.2499,
+      "morans_delta": 0.0096,
+      "lobo_delta_ap": -0.0009,
+      "verdict": "WASH",
+      "reason": "temporal AP move -0.0007 < 0.005 (noise)"
+    },
+    {
+      "name": "usgs_turbidity",
+      "level": 2,
+      "note": "NEW source 'usgs_dv_statewide' as a bacteria signal (driver-null prior \u2014 expect WASH)",
+      "added_feats": [
+        "usgs_turbidity_prev",
+        "usgs_turbidity_roll7"
+      ],
+      "ap": 0.4561,
+      "delta_ap": -0.0053,
+      "ece": 0.0119,
+      "residual_morans_i": 0.244,
+      "morans_delta": 0.0037,
+      "lobo_delta_ap": 0.0076,
+      "verdict": "REJECT",
+      "reason": "regresses temporal AP (-0.0053)"
+    },
+    {
+      "name": "gridmet_precip",
+      "level": 2,
+      "note": "NEW source 'gridmet_daily' as a bacteria signal (driver-null prior \u2014 expect WASH)",
+      "added_feats": [
+        "gridmet_precip_prev",
+        "gridmet_precip_roll7"
+      ],
+      "ap": 0.4451,
+      "delta_ap": -0.0163,
+      "ece": 0.018,
+      "residual_morans_i": 0.253,
+      "morans_delta": 0.0127,
+      "lobo_delta_ap": -0.0024,
+      "verdict": "REJECT",
+      "reason": "regresses temporal AP (-0.0163)"
+    },
+    {
+      "name": "nasa_t2m",
+      "level": 2,
+      "note": "NEW source 'nasa_power_daily' as a bacteria signal (driver-null prior \u2014 expect WASH)",
+      "added_feats": [
+        "nasa_t2m_prev",
+        "nasa_t2m_roll7"
+      ],
+      "ap": 0.4421,
+      "delta_ap": -0.0193,
+      "ece": 0.0178,
+      "residual_morans_i": 0.2596,
+      "morans_delta": 0.0193,
+      "lobo_delta_ap": -0.0107,
+      "verdict": "REJECT",
+      "reason": "regresses temporal AP (-0.0193)"
+    },
+    {
+      "name": "isd_airtemp",
+      "level": 2,
+      "note": "NEW source 'ncei_isd_hourly' as a bacteria signal (driver-null prior \u2014 expect WASH)",
+      "added_feats": [
+        "isd_airtemp_prev",
+        "isd_airtemp_roll7"
+      ],
+      "ap": 0.4125,
+      "delta_ap": -0.0489,
+      "ece": 0.0252,
+      "residual_morans_i": 0.2556,
+      "morans_delta": 0.0153,
+      "lobo_delta_ap": -0.0271,
+      "verdict": "REJECT",
+      "reason": "regresses temporal AP (-0.0489)"
+    }
+  ]
+}

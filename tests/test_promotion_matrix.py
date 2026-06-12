@@ -9,7 +9,7 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from release_gate.mbari_promotion_matrix import (  # noqa: E402
+from release_gate.mbal_promotion_matrix import (  # noqa: E402
     PromotionConfig,
     build_promotion_matrix,
     make_markdown,
@@ -20,7 +20,7 @@ from release_gate.mbari_promotion_matrix import (  # noqa: E402
 
 
 def test_promotion_matrix_marks_split_mismatch_candidate(tmp_path):
-    xgb_dir = tmp_path / "mbari_forecast_v2_results"
+    xgb_dir = tmp_path / "mbal_forecast_v2_results"
     xgb_dir.mkdir()
     pd.DataFrame(
         [
@@ -63,7 +63,7 @@ def test_promotion_matrix_marks_split_mismatch_candidate(tmp_path):
 
 
 def test_promotion_matrix_can_allow_split_mismatch(tmp_path):
-    xgb_dir = tmp_path / "mbari_forecast_v2_results"
+    xgb_dir = tmp_path / "mbal_forecast_v2_results"
     xgb_dir.mkdir()
     pd.DataFrame(
         [{"target": "temp_d10p0", "horizon_h": 24, "rmse": 1.0, "skill_rmse_vs_persistence": 0.05}]
@@ -98,7 +98,7 @@ def test_promotion_matrix_can_allow_split_mismatch(tmp_path):
 
 
 def test_promotion_matrix_promotes_matching_split(tmp_path):
-    xgb_dir = tmp_path / "mbari_forecast_v2_results"
+    xgb_dir = tmp_path / "mbal_forecast_v2_results"
     xgb_dir.mkdir()
     pd.DataFrame(
         [
@@ -145,7 +145,7 @@ def test_promotion_matrix_promotes_matching_split(tmp_path):
 
 
 def test_promotion_matrix_blocks_different_exported_split(tmp_path):
-    xgb_dir = tmp_path / "mbari_forecast_v2_results"
+    xgb_dir = tmp_path / "mbal_forecast_v2_results"
     xgb_dir.mkdir()
     pd.DataFrame(
         [
@@ -188,7 +188,7 @@ def test_promotion_matrix_blocks_different_exported_split(tmp_path):
 
 
 def test_promotion_matrix_suppresses_superseded_foundation_screening_row(tmp_path):
-    xgb_dir = tmp_path / "mbari_forecast_v2_results"
+    xgb_dir = tmp_path / "mbal_forecast_v2_results"
     xgb_dir.mkdir()
     pd.DataFrame(
         [

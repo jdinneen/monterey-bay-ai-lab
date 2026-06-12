@@ -3,7 +3,7 @@
 
 The original lovers_point predictor queried WHERE county='Monterey' -> 15 sites / 244
 exceedance events, which is too few to validate. The same BigQuery table
-(<MBARI_GCP_PROJECT>.blue_current_core_v2.california_beach_sample_observations) is statewide:
+(<MBAL_GCP_PROJECT>.blue_current_core_v2.california_beach_sample_observations) is statewide:
 ~830 sites / ~60,616 events. This pulls the full long-format record (dates >= 2005) so a
 hierarchical / pooled model with an HONEST spatial holdout (Lovers Point held out, learning
 from every other site) becomes possible.
@@ -19,17 +19,34 @@ import io, os, shutil, subprocess, sys
 from pathlib import Path
 import pandas as pd
 
-# Set MBARI_GCP_PROJECT; no specific cloud project is baked into the published source.
-PROJECT = os.environ.get("MBARI_GCP_PROJECT", "your-gcp-project")
+# Set MBAL_GCP_PROJECT; no specific cloud project is baked into the published source.
+PROJECT = os.environ.get("MBAL_GCP_PROJECT", "your-gcp-project")
 DS = "blue_current_core_v2"
 OBS = f"`{PROJECT}.{DS}.california_beach_sample_observations`"
 ADV = f"`{PROJECT}.{DS}.california_beach_advisory_events`"
 PROPS = "('prop_enterococcus','prop_total_coliform','prop_fecal_coliform','prop_e_coli')"
 START = "2005-01-01"
-OUT = Path(os.environ.get("MBARI_PROJECT_ROOT", Path(__file__).resolve().parents[2])) / "bacteria_results" / "statewide"
+OUT = Path(os.environ.get("MBAL_PROJECT_ROOT", Path(__file__).resolve().parents[2])) / "bacteria_results" / "statewide"
 
 
-def bq_query(sql: str, max_rows: int = 100_000, timeout: int = 600) -> pd.DataFrame:
+def _bq_query_client(sql: str) -> pd.DataFrame:
+    """Primary path: google-cloud-bigquery python client. No max_rows cap, native
+    types preserved (no CSV round-trip). Raises ImportError if the client library is
+    absent so the caller can fall back to the bq CLI."""
+    from google.cloud import bigquery  # local import so CLI-only envs still work
+    client = bigquery.Client(project=os.environ.get("MBAL_GCP_PROJECT"))
+    rows = client.query(" ".join(sql.split())).result()
+    try:
+        # bqstorage is faster but optional; degrades to a warning + tabledata.list
+        # when google-cloud-bigquery-storage is not installed. Some versions raise
+        # instead of warning, so retry the dataframe conversion without it.
+        return rows.to_dataframe(create_bqstorage_client=True)
+    except Exception:
+        return rows.to_dataframe(create_bqstorage_client=False)
+
+
+def _bq_query_cli(sql: str, max_rows: int = 100_000, timeout: int = 600) -> pd.DataFrame:
+    """Fallback path: shell out to the `bq` CLI (capped at max_rows, CSV typed)."""
     bq = shutil.which("bq.cmd") or shutil.which("bq")
     if not bq:
         raise RuntimeError("bq CLI not found (need authenticated Google Cloud SDK).")
@@ -39,6 +56,19 @@ def bq_query(sql: str, max_rows: int = 100_000, timeout: int = 600) -> pd.DataFr
     if r.returncode != 0:
         raise RuntimeError(r.stderr.strip() or r.stdout.strip())
     return pd.read_csv(io.StringIO(r.stdout))
+
+
+def bq_query(sql: str, max_rows: int = 100_000, timeout: int = 600) -> pd.DataFrame:
+    """Run a read-only query. Prefer the python client (no row cap, native types);
+    fall back to the bq CLI when the client library is missing or its query fails."""
+    try:
+        return _bq_query_client(sql)
+    except ImportError:
+        return _bq_query_cli(sql, max_rows=max_rows, timeout=timeout)
+    except Exception:
+        # Auth/runtime failure in the client path: retry via the CLI so CLI-only
+        # environments (and gcloud-authenticated shells) still work.
+        return _bq_query_cli(sql, max_rows=max_rows, timeout=timeout)
 
 
 def main() -> None:

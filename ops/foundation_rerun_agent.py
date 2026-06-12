@@ -16,9 +16,9 @@ from sklearn.metrics import mean_absolute_error, root_mean_squared_error
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from mbari_core import apply_physical_quality_filters
-from mbari_deep_models import chronos_forecast
-from mbari_forecast_v2 import build_hourly_matrix, load_source, variable_of
+from mbal_core import apply_physical_quality_filters
+from mbal_deep_models import chronos_forecast
+from mbal_forecast_v2 import build_hourly_matrix, load_source, variable_of
 from ops.seasonal_naive import attach_best_naive, seasonal_naive_table
 
 
@@ -34,7 +34,7 @@ def utc_now() -> str:
 
 
 def load_matrix(project_root: Path) -> pd.DataFrame:
-    raw = load_source("parquet", str(project_root / "mbari_history" / "opendap" / "m1_history.parquet"), None)
+    raw = load_source("parquet", str(project_root / "mbal_history" / "opendap" / "m1_history.parquet"), None)
     filtered = apply_physical_quality_filters(raw)
     clean = filtered[0] if isinstance(filtered, tuple) else filtered
     matrix, _coverage = build_hourly_matrix(clean)

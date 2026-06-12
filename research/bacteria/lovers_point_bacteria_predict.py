@@ -6,6 +6,10 @@ Goal: predict whether the next Lovers Point beach sample will exceed California
 single-sample bacteria standards, using only prior lab history plus already-known
 or prior environmental drivers. This is a decision-support model, not a public
 health advisory engine.
+
+This is the archived single-site precursor to the statewide bacteria headline
+(see ``operational_benchmark.py`` and ``reproduce/PAPER_DRAFT.md``); the 15-site
+Monterey-only panel was too small to validate, which motivated the statewide pivot.
 """
 from __future__ import annotations
 
@@ -37,7 +41,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
 
-ROOT = Path(os.environ.get("MBARI_PROJECT_ROOT", Path(__file__).resolve().parents[2]))
+ROOT = Path(os.environ.get("MBAL_PROJECT_ROOT", Path(__file__).resolve().parents[2]))
 OUTDIR = ROOT / "bacteria_results" / "lovers_point"
 CACHE_CSV = OUTDIR / "lovers_point_beachwatch.csv"
 MONTEREY_CACHE_CSV = OUTDIR / "monterey_county_beachwatch.csv"
@@ -47,8 +51,8 @@ CDIP_WAVE_CACHE_CSV = OUTDIR / "cdip_158_wave.csv"
 STORM_DRAIN_CACHE_CSV = OUTDIR / "lovers_storm_drain_wqp.csv"
 DRIVERS = ROOT / "nn_cache" / "drivers_hourly.parquet"
 
-# Set MBARI_GCP_PROJECT; no specific cloud project is baked into the published source.
-PROJECT = os.environ.get("MBARI_GCP_PROJECT", "your-gcp-project")
+# Set MBAL_GCP_PROJECT; no specific cloud project is baked into the published source.
+PROJECT = os.environ.get("MBAL_GCP_PROJECT", "your-gcp-project")
 TABLE = f"`{PROJECT}.blue_current_core_v2.california_beach_sample_observations`"
 RAIN_STATIONS = {
     "MRY": "monterey_airport",
@@ -69,7 +73,24 @@ THRESHOLDS = {
 }
 
 
-def run_bq_query(sql: str) -> pd.DataFrame:
+def _run_bq_query_client(sql: str) -> pd.DataFrame:
+    """Primary path: google-cloud-bigquery python client. No 100k row cap, native
+    types preserved (no CSV round-trip). Raises ImportError when the client library
+    is absent so the caller can fall back to the bq CLI."""
+    from google.cloud import bigquery  # local import so CLI-only envs still work
+    client = bigquery.Client(project=os.environ.get("MBAL_GCP_PROJECT"))
+    rows = client.query(" ".join(sql.split())).result()
+    try:
+        # bqstorage is optional; degrades to a warning + tabledata.list when
+        # google-cloud-bigquery-storage is not installed. Some versions raise
+        # instead of warning, so retry the dataframe conversion without it.
+        return rows.to_dataframe(create_bqstorage_client=True)
+    except Exception:
+        return rows.to_dataframe(create_bqstorage_client=False)
+
+
+def _run_bq_query_cli(sql: str) -> pd.DataFrame:
+    """Fallback path: shell out to the `bq` CLI (capped at 100k rows, CSV typed)."""
     bq = shutil.which("bq.cmd") if os.name == "nt" else shutil.which("bq")
     bq = bq or shutil.which("bq")
     if not bq:
@@ -80,6 +101,19 @@ def run_bq_query(sql: str) -> pd.DataFrame:
     if result.returncode != 0:
         raise RuntimeError(result.stderr.strip() or result.stdout.strip())
     return pd.read_csv(io.StringIO(result.stdout))
+
+
+def run_bq_query(sql: str) -> pd.DataFrame:
+    """Run a read-only query. Prefer the python client (no row cap, native types);
+    fall back to the bq CLI when the client library is missing or its query fails."""
+    try:
+        return _run_bq_query_client(sql)
+    except ImportError:
+        return _run_bq_query_cli(sql)
+    except Exception:
+        # Auth/runtime failure in the client path: retry via the CLI so CLI-only
+        # environments (and gcloud-authenticated shells) still work.
+        return _run_bq_query_cli(sql)
 
 
 def fetch_lovers_point(force: bool = False) -> pd.DataFrame:

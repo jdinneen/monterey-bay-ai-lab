@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Adversarial critic for promoted MBARI forecast claims."""
+"""Adversarial critic for promoted MBAL forecast claims."""
 from __future__ import annotations
 
 import argparse
@@ -21,17 +21,20 @@ def grade_row(row: pd.Series) -> tuple[str, list[str]]:
     reasons: list[str] = []
     shared = _as_bool(row.get("shared_split"))
     n = pd.to_numeric(pd.Series([row.get("candidate_n")]), errors="coerce").iloc[0]
-    skill = pd.to_numeric(pd.Series([row.get("candidate_skill_vs_persistence_pct")]), errors="coerce").iloc[0]
+    skill_persist = pd.to_numeric(pd.Series([row.get("candidate_skill_vs_persistence_pct")]), errors="coerce").iloc[0]
+    skill_best = pd.to_numeric(pd.Series([row.get("candidate_skill_vs_best_naive_pct")]), errors="coerce").iloc[0]
     delta = pd.to_numeric(pd.Series([row.get("xgb_delta_skill_pct")]), errors="coerce").iloc[0]
     xgb_skill = pd.to_numeric(pd.Series([row.get("xgb_skill_vs_persistence_pct")]), errors="coerce").iloc[0]
+
     if not shared:
         reasons.append("not on shared split")
     if pd.isna(n) or n < 20:
         reasons.append("too few scored observations")
-    if pd.isna(skill) or skill <= 0:
-        reasons.append("does not beat persistence")
-    if pd.isna(delta) or delta <= 0:
-        reasons.append("does not beat XGBoost")
+    if pd.isna(skill_best) or skill_best < 0.5:
+        reasons.append(f"insufficient lift vs best-naive: {skill_best}%")
+    if pd.isna(delta) or delta < 1.0:
+        reasons.append(f"insufficient lift vs XGBoost: {delta}%")
+    
     if reasons:
         return "do_not_claim", reasons
     weak = []
@@ -105,7 +108,7 @@ def write_outputs(report: dict[str, Any], output_dir: Path) -> dict[str, str]:
     md_path = output_dir / "PROMOTION_CRITIC_REPORT.md"
     json_path.write_text(json.dumps(report, indent=2, sort_keys=True, default=str), encoding="utf-8")
     lines = [
-        "# MBARI Promotion Critic",
+        "# Monterey Bay AI Lab Promotion Critic",
         "",
         f"- Overall status: **{report['overall_status']}**",
         f"- Promoted rows: `{report['promoted_rows']}`",
@@ -135,3 +138,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check tracked reports/docs against current MBARI gate truth."""
+"""Check tracked reports/docs against current MBAL gate truth."""
 from __future__ import annotations
 
 import argparse
@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 
 
-DOCS = ["PRODUCTION_READINESS.md", "MBARI_PRODUCTION_LAKEHOUSE_CONTRACTS.md", "README.md"]
+DOCS = ["PRODUCTION_READINESS.md", "MBAL_PRODUCTION_LAKEHOUSE_CONTRACTS.md", "README.md"]
 FORBIDDEN = [
     r"\bis (?:a )?global SOTA\b",
     r"\bestablished global SOTA\b",
@@ -100,7 +100,7 @@ def write_outputs(report: dict[str, Any], output_dir: Path) -> dict[str, str]:
     md_path = output_dir / "REPORT_CONSISTENCY_REPORT.md"
     json_path.write_text(json.dumps(report, indent=2, sort_keys=True, default=str), encoding="utf-8")
     lines = [
-        "# MBARI Report Consistency Agent",
+        "# Monterey Bay AI Lab Report Consistency Agent",
         "",
         f"- Overall status: **{report['overall_status']}**",
         "",
@@ -128,3 +128,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

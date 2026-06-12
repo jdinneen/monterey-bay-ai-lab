@@ -215,7 +215,7 @@ def write_outputs(champions: pd.DataFrame, output_dir: Path) -> dict[str, str]:
     champions.to_parquet(parquet_path, index=False)
     json_path.write_text(json.dumps(summary, indent=2, sort_keys=True), encoding="utf-8")
     lines = [
-        "# MBARI Champion Selector",
+        "# MBAL Champion Selector",
         "",
         f"Generated: `{datetime.now(timezone.utc).isoformat(timespec='seconds')}`",
         "",

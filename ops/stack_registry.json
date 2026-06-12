@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "source": "ops/stack_viz plus Agent Brain operating model",
+  "required_layers": [
+    {
+      "id": "sources",
+      "label": "Sources",
+      "dashboard": "Stack Watch",
+      "must_show": true,
+      "why": "Raw mooring-provider, NOAA, CenCOOS, local history, satellite, and driver inputs."
+    },
+    {
+      "id": "bronze",
+      "label": "Bronze",
+      "dashboard": "Stack Watch",
+      "must_show": true,
+      "why": "Source registry, raw snapshots, mirrors, and ingestion logs."
+    },
+    {
+      "id": "silver",
+      "label": "Silver",
+      "dashboard": "Stack Watch",
+      "must_show": true,
+      "why": "QC, masks, deterministic splits, and leakage controls."
+    },
+    {
+      "id": "training",
+      "label": "Training",
+      "dashboard": "Stack Watch",
+      "must_show": true,
+      "why": "Continual learner, MoE, NeuralForecast, latent models, and GPU runs."
+    },
+    {
+      "id": "evaluation",
+      "label": "Evaluation",
+      "dashboard": "Stack Watch",
+      "must_show": true,
+      "why": "Walk-forward CV, metrics, uncertainty, seasonal-naive and XGBoost comparisons."
+    },
+    {
+      "id": "gold",
+      "label": "Gold",
+      "dashboard": "Stack Watch",
+      "must_show": true,
+      "why": "Forecast predictions, metrics, manifests, and publishable artifacts."
+    },
+    {
+      "id": "claims",
+      "label": "Claim Gate",
+      "dashboard": "Stack Watch",
+      "must_show": true,
+      "why": "Promotion matrix, claim boundaries, release/evidence gates."
+    },
+    {
+      "id": "agents",
+      "label": "Agents",
+      "dashboard": "Command Center",
+      "must_show": true,
+      "why": "Codex, Claude, Gemini, Qwen/Ollama roles, locks, and ownership."
+    },
+    {
+      "id": "brain",
+      "label": "Agent Brain",
+      "dashboard": "Command Center",
+      "must_show": true,
+      "why": "Invariants, lessons, rejected ideas, preflight, and operating loop."
+    },
+    {
+      "id": "traffic",
+      "label": "Traffic/GPU Guard",
+      "dashboard": "Command Center",
+      "must_show": true,
+      "why": "Task locks, VRAM admission, run_safe, and next safe action."
+    },
+    {
+      "id": "sentinel",
+      "label": "Sentinel",
+      "dashboard": "Command Center",
+      "must_show": true,
+      "why": "Background completion/alert state for long jobs."
+    },
+    {
+      "id": "telemetry",
+      "label": "Telemetry",
+      "dashboard": "Stack Watch",
+      "must_show": true,
+      "why": "Host CPU/RAM/disk/network/process telemetry and history."
+    }
+  ],
+  "anti_bloat_rule": "Use this registry to check coverage. Do not add a new dashboard panel unless it closes a missing required layer or answers the next-safe-action question."
+}

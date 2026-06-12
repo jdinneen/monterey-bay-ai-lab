@@ -1,4 +1,4 @@
-"""Smoke test for RTX 5090 local MBARI AI environments.
+"""Smoke test for RTX 5090 local Monterey Bay AI Lab environments.
 
 This script intentionally runs real CUDA work rather than only checking imports.
 It exits non-zero if PyTorch CUDA or XGBoost GPU execution is unavailable.
@@ -146,3 +146,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

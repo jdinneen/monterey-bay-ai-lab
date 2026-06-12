@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Evidence gate for MBARI model claims.
+"""Evidence gate for Monterey Bay AI Lab model claims.
 
 This script does not promote models. It audits existing promotion/lakehouse artifacts
 and fails only on evidence contract violations: unsupported promoted rows, duplicate
@@ -20,14 +20,14 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from mbari_lakehouse import read_forecast_metrics
+from mbal_lakehouse import read_forecast_metrics
 
 
 STATUS_ORDER = {"PASS": 0, "WARN": 1, "FAIL": 2}
 DOCS_TO_SCAN = [
     "README.md",
     "PRODUCTION_READINESS.md",
-    "MBARI_PRODUCTION_LAKEHOUSE_CONTRACTS.md",
+    "MBAL_PRODUCTION_LAKEHOUSE_CONTRACTS.md",
     "release_gate/reports/promotion_matrix.md",
     "release_gate/reports/release_gate_report.md",
 ]
@@ -125,13 +125,13 @@ def check_promotion_evidence(matrix: pd.DataFrame, summary: dict[str, Any], min_
     bad_shared = promoted[~shared_split]
     bad_n = promoted[candidate_n.isna() | (candidate_n < int(min_n))]
     bad_persistence = promoted[persistence_skill.isna() | (persistence_skill <= 0)]
-    bad_best_naive = promoted[best_naive_skill <= 0]
+    bad_best_naive = promoted[best_naive_skill.isna() | (best_naive_skill < 0.5)]
     # Persistence is a free lunch at diurnal horizons (>=24h), so a diurnal
     # promotion MUST carry seasonal-naive evidence. Missing evidence there is a
     # hard contract violation the matrix should never emit.
     diurnal_unverified = promoted[(horizon >= 24) & best_naive_skill.isna()]
     subdiurnal_unverified = promoted[(horizon < 24) & best_naive_skill.isna()]
-    bad_xgb = promoted[xgb_delta.isna() | (xgb_delta <= 0)]
+    bad_xgb = promoted[xgb_delta.isna() | (xgb_delta < 1.0)]
     details["bad_shared_split_rows"] = int(len(bad_shared))
     details["low_n_rows"] = int(len(bad_n))
     details["not_beating_persistence_rows"] = int(len(bad_persistence))
@@ -240,7 +240,7 @@ def write_outputs(report: dict[str, Any], output_dir: Path) -> dict[str, str]:
     md_path = output_dir / "EVIDENCE_GATE_REPORT.md"
     json_path.write_text(json.dumps(report, indent=2, sort_keys=True, default=str), encoding="utf-8")
     lines = [
-        "# MBARI Evidence Gate",
+        "# Monterey Bay AI Lab Evidence Gate",
         "",
         f"- Overall status: **{report['overall_status']}**",
         f"- Generated: `{report['generated_at_utc']}`",
@@ -276,3 +276,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

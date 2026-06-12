@@ -1,0 +1,28 @@
+# Set default behavior to automatically detect text files and normalize line endings.
+* text=auto
+
+# Force LF on all text files for cross-platform consistency (Windows/Linux/Mac).
+*.py text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.txt text eol=lf
+*.sha256 text eol=lf
+*.ps1 text eol=crlf
+
+# Frozen reproduce artifacts are compared byte-for-byte by reviewers; never
+# rewrite their checked-out line endings.
+research/bacteria/reproduce/expected/* -text
+
+# Mark binary files to prevent corruption during merge/normalization.
+*.pt binary
+*.parquet binary
+*.pth binary
+*.pkl binary
+*.obj binary
+*.stl binary
+*.mp4 binary
+*.db binary
+*.pyd binary
+*.pyc binary

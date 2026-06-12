@@ -16,8 +16,8 @@ import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-ROOT = Path(os.environ.get("MBARI_PROJECT_ROOT", Path(__file__).resolve().parents[2])).resolve()
-NOAA = ROOT / "mbari_history" / "noaa"
+ROOT = Path(os.environ.get("MBAL_PROJECT_ROOT", Path(__file__).resolve().parents[2])).resolve()
+NOAA = ROOT / "mbal_history" / "noaa"
 OUT = ROOT / "viz_output" / "monterey_bay_signal_explorer.html"
 OUT.parent.mkdir(parents=True, exist_ok=True)
 
